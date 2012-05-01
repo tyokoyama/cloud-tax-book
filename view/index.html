@@ -22,7 +22,29 @@
 			$("#datepicker").datepicker({
 				dateFormat: 'yy-mm-dd'
 			});
+
+			$("#inputbtn").click(function (e) {
+				var parameters = {date: $('#datepicker').val(),
+								  detail: $('#detail').val(),
+								  moneysalesin: $('#moneysalesin').val(),
+								  moneyin: $('#moneyin').val(),
+								  moneysalesout: $('#moneysalesout').val(),
+								  moneyout: $('#moneyout').val(),
+								  balance: $('#balance').val()
+								 };
+
+				$.post('/addcash',
+					   parameters,
+					   inputResult,
+					   'json');
+			});
 		});
+
+		function inputResult(body, status, xhr) {
+			console.log(body);
+			console.log(status);
+			console.log(xhr);
+		}
 	</script>
 </head>
 <body>
@@ -32,6 +54,7 @@
 			<tr>
 				<th>登録日</th>
 				<th>明細</th>
+				<th>勘定科目</th>
 				<th>現金売上</th>
 				<th>その他入金</th>
 				<th>現金仕入</th>
@@ -43,23 +66,30 @@
 			<tr>
 				<td>{{.Date}}</td>
 				<td>{{.Detail}}</td>
+				<td>
+					<select id="moneyType">
+						<option value="1">通信費</option>
+						<option value="2">事業主借</option>
+						<option value="3">事業主貸</option>
+					</select>
+				</td>
 				<td>{{.MoneySalesIn}}</td>
 				<td>{{.MoneyIn}}</td>
 				<td>{{.MoneySalesOut}}</td>
 				<td>{{.MoneyOut}}</td>
 				<td>{{.Balance}}</td>
-				<td><input type="button" value="編集" /></td>
+				<td><input type="button" id="editbtn" value="編集" /></td>
 			</tr>
 			{{end}}
 			<tr>
-				<td><input type="date" id="datepicker" name="date" /></td>
-				<td><input type="text" name="detail" /></td>
-				<td><input type="number" name="moneysalesin" /></td>
-				<td><input type="number" name="moneyin" /></td>
-				<td><input type="number" name="moneysalesout" /></td>
-				<td><input type="number" name="moneyout" /></td>
-				<td><div></div></td>
-				<td><input type="button" value="登録" /></td>
+				<td><input type="date" id="datepicker" /></td>
+				<td><input type="text" id="detail" /></td>
+				<td><input type="number" id="moneysalesin" /></td>
+				<td><input type="number" id="moneyin" /></td>
+				<td><input type="number" id="moneysalesout" /></td>
+				<td><input type="number" id="moneyout" /></td>
+				<td><div id="balance"></div></td>
+				<td><input type="button" id="inputbtn" value="登録" /></td>
 			</tr>
 		</table>
 	</article>

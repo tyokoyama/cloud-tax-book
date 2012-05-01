@@ -7,10 +7,6 @@ import (
 	"model"
 )
 
-func init() {
-	http.HandleFunc("/", indexHandler)
-}
-
 var htmltemplate = template.Must(template.ParseFiles("view/index.html"))
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)

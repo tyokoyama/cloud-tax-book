@@ -7,9 +7,9 @@ import (
 )
 
 type Cash struct {
-	Key *datastore.Key // 現金データへのキー
-	Date time.Time       // 登録日付
-	Detail string	// 明細
+	Type int 			// 費用種別（通信費、事業主貸、事業主借…）
+	Date time.Time      // 登録日付
+	Detail string		// 明細
 	MoneySalesIn int64	// 現金売上入金
 	MoneyIn int64		// その他入金
 	MoneySalesOut int64	// 現金仕入
@@ -59,21 +59,18 @@ func (cash *Cash)PutNew(c appengine.Context) (*Cash, error) {
 		return nil, nil
 	}
 
-	key := datastore.NewIncompleteKey(c, "cash", nil)
+	key := datastore.NewIncompleteKey(c, "Cash", nil)
 
-	cash.Key = key
-	cash.Date = time.Now()
-
-	return cash.Put(c)
+	return cash.Put(c, key)
 }
 
 // データストアへのPUT
-func (cash *Cash)Put(c appengine.Context) (*Cash, error) {
-	if c == nil || cash.Key == nil {
+func (cash *Cash)Put(c appengine.Context, key *datastore.Key) (*Cash, error) {
+	if c == nil || key == nil {
 		return nil, nil
 	}
 
-	if _, err := datastore.Put(c, cash.Key, cash); err != nil {
+	if _, err := datastore.Put(c, key, cash); err != nil {
 		return nil, err
 	}
 
