@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>クラウド帳簿</title>
+	<link rel="stylesheet" href="style.css"></link>
+	<link href="jquery-ui-1.8.18.custom.css" rel="stylesheet">
+	<script src="http://www.google.com/jsapi"></script>
+	<script>
+		google.load("jquery", "1.7");
+		google.load("jqueryui", "1.8");
+	</script>
+	<script>
+		$(function() {
+			$("input[type='text']").keypress(function(event) {
+				if(!event) var event = window.event;
+				if(event.keyCode == 13) {
+					return false;
+				}
+			});
+			
+			$("#datepicker").datepicker({
+				dateFormat: 'yy-mm-dd'
+			});
+		});
+	</script>
+</head>
+<body>
+	クラウド帳簿
+	<article id="contents">
+		<table>
+			<tr>
+				<th>登録日</th>
+				<th>明細</th>
+				<th>現金売上</th>
+				<th>その他入金</th>
+				<th>現金仕入</th>
+				<th>その他出金</th>
+				<th>残高</th>
+				<th>登録／編集</th>
+			</tr>
+			{{range .}}
+			<tr>
+				<td>{{.Date}}</td>
+				<td>{{.Detail}}</td>
+				<td>{{.MoneySalesIn}}</td>
+				<td>{{.MoneyIn}}</td>
+				<td>{{.MoneySalesOut}}</td>
+				<td>{{.MoneyOut}}</td>
+				<td>{{.Balance}}</td>
+				<td><input type="button" value="編集" /></td>
+			</tr>
+			{{end}}
+			<tr>
+				<td><input type="date" id="datepicker" name="date" /></td>
+				<td><input type="text" name="detail" /></td>
+				<td><input type="number" name="moneysalesin" /></td>
+				<td><input type="number" name="moneyin" /></td>
+				<td><input type="number" name="moneysalesout" /></td>
+				<td><input type="number" name="moneyout" /></td>
+				<td><div></div></td>
+				<td><input type="button" value="登録" /></td>
+			</tr>
+		</table>
+	</article>
+</body>
+</html>
