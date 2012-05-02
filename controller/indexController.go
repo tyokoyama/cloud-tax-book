@@ -16,7 +16,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := htmltemplate.Execute(w, cashes); err != nil {
+	var viewcashes = make([]model.ViewCash, len(cashes))
+	for pos, cash := range cashes {
+		viewcashes[pos].Create(cash)
+	}
+
+	if err := htmltemplate.Execute(w, viewcashes); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

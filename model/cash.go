@@ -26,7 +26,7 @@ func QueryCash(c appengine.Context) ([]Cash, error) {
 	if count, err := q.Count(c); err != nil {
 		return nil, err
 	} else {
-		cashes := make([]Cash, count)
+		cashes := make([]Cash, 0, count)
 		_, getErr := q.GetAll(c, &cashes)
 		if getErr != nil {
 			return nil, getErr

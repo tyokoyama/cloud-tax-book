@@ -19,12 +19,16 @@
 				}
 			});
 			
-			$("#datepicker").datepicker({
+			$("#cashdatepicker").datepicker({
 				dateFormat: 'yy-mm-dd'
 			});
 
-			$("#inputbtn").click(function (e) {
-				var parameters = {date: $('#datepicker').val(),
+			$("#bookdatepicker").datepicker({
+				dateFormat: 'yy-mm-dd'
+			});
+
+			$("#cashinputbtn").click(function (e) {
+				var parameters = {date: $('#cashdatepicker').val(),
 								  detail: $('#detail').val(),
 								  moneysalesin: $('#moneysalesin').val(),
 								  moneyin: $('#moneyin').val(),
@@ -33,65 +37,136 @@
 								  balance: $('#balance').val()
 								 };
 
-				$.post('/addcash',
-					   parameters,
-					   inputResult,
-					   'json');
+				$.ajax({
+					type: "POST",
+					url: '/addcash',
+					data: parameters,
+					dataType: "json",
+					success: function(data, status, xhr) {
+						console.log("[success]");
+						console.log(data);
+						console.log(status);
+						console.log(xhr);
+					},
+					error: function(xhr, status, error) {
+						console.log("[error]");
+						console.log(xhr);
+						console.log(status);
+						console.log(error);
+					}
+				});
 			});
-		});
 
-		function inputResult(body, status, xhr) {
-			console.log(body);
-			console.log(status);
-			console.log(xhr);
-		}
+			$('#tabset').tabs('destroy');
+			$('#tabset > ul').tabs();
+
+			var options = {
+				selected: 0
+			};
+
+			$('#tabset').tabs(options);
+		});
 	</script>
 </head>
 <body>
 	クラウド帳簿
 	<article id="contents">
-		<table>
-			<tr>
-				<th>登録日</th>
-				<th>明細</th>
-				<th>勘定科目</th>
-				<th>現金売上</th>
-				<th>その他入金</th>
-				<th>現金仕入</th>
-				<th>その他出金</th>
-				<th>残高</th>
-				<th>登録／編集</th>
-			</tr>
-			{{range .}}
-			<tr>
-				<td>{{.Date}}</td>
-				<td>{{.Detail}}</td>
-				<td>
-					<select id="moneyType">
-						<option value="1">通信費</option>
-						<option value="2">事業主借</option>
-						<option value="3">事業主貸</option>
-					</select>
-				</td>
-				<td>{{.MoneySalesIn}}</td>
-				<td>{{.MoneyIn}}</td>
-				<td>{{.MoneySalesOut}}</td>
-				<td>{{.MoneyOut}}</td>
-				<td>{{.Balance}}</td>
-				<td><input type="button" id="editbtn" value="編集" /></td>
-			</tr>
-			{{end}}
-			<tr>
-				<td><input type="date" id="datepicker" /></td>
-				<td><input type="text" id="detail" /></td>
-				<td><input type="number" id="moneysalesin" /></td>
-				<td><input type="number" id="moneyin" /></td>
-				<td><input type="number" id="moneysalesout" /></td>
-				<td><input type="number" id="moneyout" /></td>
-				<td><div id="balance"></div></td>
-				<td><input type="button" id="inputbtn" value="登録" /></td>
-			</tr>
-		</table>
+		<div id="tabset">
+			<ul>
+				<li><a href="#panel1">現金出納帳</a></li>
+				<li><a href="#panel2">預金出納帳</a></li>
+			</ul>
+			<div id="panel1">
+				<table class="list">
+					<tr>
+						<th class="date">登録日</th>
+						<th>明細</th>
+						<th>勘定科目</th>
+						<th>現金売上</th>
+						<th>その他入金</th>
+						<th>現金仕入</th>
+						<th>その他出金</th>
+						<th>残高</th>
+						<th>登録／編集</th>
+					</tr>
+					{{range .}}
+					<tr>
+						<td class="date">{{.Date}}</td>
+						<td>{{.Detail}}</td>
+						<td>{{.Type}}</td>
+						<td class="number">{{.MoneySalesIn}}</td>
+						<td class="number">{{.MoneyIn}}</td>
+						<td class="number">{{.MoneySalesOut}}</td>
+						<td class="number">{{.MoneyOut}}</td>
+						<td class="number">{{.Balance}}</td>
+						<td><input type="button" id="casheditbtn" value="編集" /></td>
+					</tr>
+					{{end}}
+					<tr>
+						<td class="date"><input class="date" type="date" id="cashdatepicker" /></td>
+						<td><input type="text" id="detail" /></td>
+						<td>
+							<select id="moneyType">
+								<option value="1">通信費</option>
+								<option value="2">事業主借</option>
+								<option value="3">事業主貸</option>
+							</select>
+						</td>
+						<td><input class="number" type="number" id="moneysalesin" /></td>
+						<td><input class="number" type="number" id="moneyin" /></td>
+						<td><input class="number" type="number" id="moneysalesout" /></td>
+						<td><input class="number" type="number" id="moneyout" /></td>
+						<td><div class="number" id="balance"></div></td>
+						<td><input type="button" id="cashinputbtn" value="登録" /></td>
+					</tr>
+				</table>
+			</div>
+			<div id="panel2">
+				<table class="list">
+					<tr>
+						<th class="date">登録日</th>
+						<th>明細</th>
+						<th>勘定科目</th>
+						<th>預金売上</th>
+						<th>その他入金</th>
+						<th>預金仕入</th>
+						<th>その他出金</th>
+						<th>残高</th>
+						<th>登録／編集</th>
+					</tr>
+					{{range .}}
+					<tr>
+						<td class="date">{{.Date}}</td>
+						<td>{{.Detail}}</td>
+						<td>{{.Type}}</td>
+						<td class="number">{{.MoneySalesIn}}</td>
+						<td class="number">{{.MoneyIn}}</td>
+						<td class="number">{{.MoneySalesOut}}</td>
+						<td class="number">{{.MoneyOut}}</td>
+						<td class="number">{{.Balance}}</td>
+						<td><input type="button" id="bookeditbtn" value="編集" /></td>
+					</tr>
+					{{end}}
+					<tr>
+						<td class="date"><input class="date" type="date" id="bookdatepicker" /></td>
+						<td><input type="text" id="detail" /></td>
+						<td>
+							<select id="moneyType">
+								<option value="1">通信費</option>
+								<option value="2">事業主借</option>
+								<option value="3">事業主貸</option>
+							</select>
+						</td>
+						<td><input class="number" type="number" id="moneysalesin" /></td>
+						<td><input class="number" type="number" id="moneyin" /></td>
+						<td><input class="number" type="number" id="moneysalesout" /></td>
+						<td><input class="number" type="number" id="moneyout" /></td>
+						<td><div class="number" id="balance"></div></td>
+						<td><input type="button" id="bookinputbtn" value="登録" /></td>
+					</tr>
+				</table>
+			</div>
+		</div>
 	</article>
 </body>
 </html>

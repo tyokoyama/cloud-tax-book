@@ -33,7 +33,8 @@ func addcash(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("{error: " + err.Error() + "}"))
 	} else {
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{status: ok}"))
+		w.Write([]byte(`{"status": "ok"}`))
 	}
 }
