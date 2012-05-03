@@ -1,3 +1,18 @@
+{{/*
+Copyright 2012 Takashi Yokoyama
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,6 +45,7 @@
 			$("#cashinputbtn").click(function (e) {
 				var parameters = {date: $('#cashdatepicker').val(),
 								  detail: $('#detail').val(),
+								  type: $('moneyType').val(),
 								  moneysalesin: $('#moneysalesin').val(),
 								  moneyin: $('#moneyin').val(),
 								  moneysalesout: $('#moneysalesout').val(),
@@ -47,14 +63,66 @@
 						console.log(data);
 						console.log(status);
 						console.log(xhr);
+
+						var content = $("<tr></tr>")
+										.append("<td>" + $('#cashdatepicker').val() + "</td>")
+										.append("<td>" + $('#detail').val() + "</td>")
+										.append("<td>" + $('#moneyType').val() + "</td>")
+										.append("<td>" + $('#moneysalesin').val() + "</td>")
+										.append("<td>" + $('#moneyin').val() + "</td>")
+										.append("<td>" + $('#moneysalesout').val() + "</td>")
+										.append("<td>" + $('#moneyout').val() + "</td>")
+										.append("<td>" + $('#balance').val() + "</td>")
+										.append("<td><input type=\"button\" id=\"casheditbtn\" value=\"編集\" /></td>");
+
+						$('#cashdatepicker').val('');
+						$('#detail').val('');
+						$('#moneyType').val('');
+						$('#moneysalesin').val('');
+						$('#moneyin').val('');
+						$('#moneysalesout').val('');
+						$('#moneyout').val('');
+						$('#balance').val('');
+
+						$('#panel1 .list tbody tr:last-child').before(content);
 					},
 					error: function(xhr, status, error) {
-						console.log("[error]");
-						console.log(xhr);
-						console.log(status);
-						console.log(error);
+						alert("サーバへの登録でエラーが発生しました。もう一度登録して下さい。\n" + "[" +  status + "]");
 					}
 				});
+			});
+
+			// 現金出納帳の編集ボタンのイベント登録
+			$('#casheditbtn').live(
+				'click',
+				function (e) {
+					var obj = $(this).closest('tr');
+					var inrow = $('#panel1 .list tr:last-child').clone();
+					var inputChildren = $(inrow).children('td');
+					$(inputChildren[0]).children('input').val($(obj).children('td')[0].innerText);
+					$(inputChildren[1]).children('input').val($(obj).children('td')[1].innerText);
+
+					// 勘定科目は登録の物を使い回すのでコピーしない。
+
+					$(inputChildren[3]).children('input').val($(obj).children('td')[3].innerText);
+					$(inputChildren[4]).children('input').val($(obj).children('td')[4].innerText);
+					$(inputChildren[5]).children('input').val($(obj).children('td')[5].innerText);
+					$(inputChildren[6]).children('input').val($(obj).children('td')[6].innerText);
+					// 残高は入力しない。
+					$(inputChildren)[7].innerText = $(obj).children('td')[7].innerText;
+					$(inrow).children('td:last-child').children('input:button').attr('value', '更新');
+					obj.after(inrow);
+
+					// 表示内容は削除
+					$(obj).remove();
+				});
+
+			$('#bookinputbtn').click(function (e) {
+
+			});
+
+			$('#bookeditbtn').click(function (e) {
+
 			});
 
 			$('#tabset').tabs('destroy');
