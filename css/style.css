@@ -20,3 +20,8 @@ article#contents {
 .list .date {
 	width: 100px;
 }
+
+section#contents {
+	margin: auto;
+	width: 500px;
+}

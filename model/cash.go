@@ -23,6 +23,7 @@ import (
 
 type Cash struct {
 	Type int 									// 費用種別（通信費、事業主貸、事業主借…）
+	TypeName string `datastore:",noindex"`		// 費用種別名
 	Date time.Time      						// 登録日付
 	IsExpense bool `datastore:",noindex"`		// 経費かどうか（true：経費／false：経費ではない）
 	Detail string `datastore:",noindex"`		// 明細

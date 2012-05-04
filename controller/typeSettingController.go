@@ -15,16 +15,24 @@ limitations under the License.
 */
 package controller
 
-import (
+import(
+	"appengine"
+	"model"
 	"net/http"
+//	"strconv"
+	"html/template"
 )
 
-func init() {
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/addcash", addcash)
-	http.HandleFunc("/updatecash", updatecash)
-	http.HandleFunc("/addbook", addbook)
-	http.HandleFunc("/updatebook", updatebook)
-	http.HandleFunc("/updateinitial", updateinitial)
-	http.HandleFunc("/typesetting", typesetting)
+var htmltypesettingtemplate = template.Must(template.ParseFiles("view/typesetting.html"))
+func typesetting(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	c.Infof("typesetting")
+
+	_, types, _ := model.QueryType(c)
+
+	if err := htmltypesettingtemplate.Execute(w, types); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
