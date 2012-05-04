@@ -22,35 +22,36 @@ import (
 )
 
 type Cash struct {
-	Type int 			// 費用種別（通信費、事業主貸、事業主借…）
-	Date time.Time      // 登録日付
-	Detail string		// 明細
-	MoneySalesIn int64	// 現金売上入金
-	MoneyIn int64		// その他入金
-	MoneySalesOut int64	// 現金仕入
-	MoneyOut int64		// その他出金
-	Balance int64		// 残高
+	Type int 									// 費用種別（通信費、事業主貸、事業主借…）
+	Date time.Time      						// 登録日付
+	IsExpense bool `datastore:",noindex"`		// 経費かどうか（true：経費／false：経費ではない）
+	Detail string `datastore:",noindex"`		// 明細
+	MoneySalesIn int64 `datastore:",noindex"`	// 現金売上入金
+	MoneyIn int64 `datastore:",noindex"`		// その他入金
+	MoneySalesOut int64 `datastore:",noindex"`	// 現金仕入
+	MoneyOut int64 `datastore:",noindex"`		// その他出金
+	Balance int64 `datastore:",noindex"`		// 残高
 }
 
-func QueryCash(c appengine.Context) ([]Cash, error) {
+func QueryCash(c appengine.Context) ([]*datastore.Key, []Cash, error) {
 	if c == nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	q := datastore.NewQuery("Cash")
 	if count, err := q.Count(c); err != nil {
-		return nil, err
+		return nil, nil, err
 	} else {
 		cashes := make([]Cash, 0, count)
-		_, getErr := q.GetAll(c, &cashes)
+		keys, getErr := q.GetAll(c, &cashes)
 		if getErr != nil {
-			return nil, getErr
+			return nil, nil, getErr
 		}
 
-		return cashes, nil
+		return keys, cashes, nil
 	}
 
-	return nil, nil
+	return nil, nil, nil
 }
 
 // データストアからのGET
@@ -69,9 +70,9 @@ func GetCash(c appengine.Context, key *datastore.Key) (*Cash, error) {
 }
 
 // データストアへのPUT（新規登録）
-func (cash *Cash)PutNew(c appengine.Context) (*Cash, error) {
+func (cash *Cash)PutNew(c appengine.Context) (*Cash, *datastore.Key, error) {
 	if c == nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	key := datastore.NewIncompleteKey(c, "Cash", nil)
@@ -80,14 +81,16 @@ func (cash *Cash)PutNew(c appengine.Context) (*Cash, error) {
 }
 
 // データストアへのPUT
-func (cash *Cash)Put(c appengine.Context, key *datastore.Key) (*Cash, error) {
+func (cash *Cash)Put(c appengine.Context, key *datastore.Key) (*Cash, *datastore.Key, error) {
 	if c == nil || key == nil {
-		return nil, nil
+		return nil, nil, nil
 	}
 
-	if _, err := datastore.Put(c, key, cash); err != nil {
-		return nil, err
+	if putKey, err := datastore.Put(c, key, cash); err != nil {
+		return nil, nil, err
+	} else {
+		return cash, putKey, nil
 	}
 
-	return cash, nil
+	return nil, nil, nil
 }

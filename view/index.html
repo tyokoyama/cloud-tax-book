@@ -59,21 +59,16 @@ limitations under the License.
 					data: parameters,
 					dataType: "json",
 					success: function(data, status, xhr) {
-						console.log("[success]");
-						console.log(data);
-						console.log(status);
-						console.log(xhr);
-
 						var content = $("<tr></tr>")
 										.append("<td>" + $('#cashdatepicker').val() + "</td>")
 										.append("<td>" + $('#detail').val() + "</td>")
-										.append("<td>" + $('#moneyType').val() + "</td>")
+										.append("<td>" + $('#moneyType').children(':selected').text() + "</td>")
 										.append("<td>" + $('#moneysalesin').val() + "</td>")
 										.append("<td>" + $('#moneyin').val() + "</td>")
 										.append("<td>" + $('#moneysalesout').val() + "</td>")
 										.append("<td>" + $('#moneyout').val() + "</td>")
 										.append("<td>" + $('#balance').val() + "</td>")
-										.append("<td><input type=\"button\" id=\"casheditbtn\" value=\"編集\" /></td>");
+										.append("<td><input type=\"button\" id=\"casheditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
 
 						$('#cashdatepicker').val('');
 						$('#detail').val('');
@@ -87,7 +82,7 @@ limitations under the License.
 						$('#panel1 .list tbody tr:last-child').before(content);
 					},
 					error: function(xhr, status, error) {
-						alert("サーバへの登録でエラーが発生しました。もう一度登録して下さい。\n" + "[" +  status + "]");
+						alert("サーバへの登録でエラーが発生しました。もう一度登録して下さい。\n" + "[" +  xhr.status + "]");
 					}
 				});
 			});
@@ -100,6 +95,9 @@ limitations under the License.
 					var inrow = $('#panel1 .list tr:last-child').clone();
 					var inputChildren = $(inrow).children('td');
 					$(inputChildren[0]).children('input').val($(obj).children('td')[0].innerText);
+					$(inputChildren[0]).children('input').datepicker({
+						dateFormat: 'yy-mm-dd'
+					});
 					$(inputChildren[1]).children('input').val($(obj).children('td')[1].innerText);
 
 					// 勘定科目は登録の物を使い回すのでコピーしない。
@@ -110,7 +108,47 @@ limitations under the License.
 					$(inputChildren[6]).children('input').val($(obj).children('td')[6].innerText);
 					// 残高は入力しない。
 					$(inputChildren)[7].innerText = $(obj).children('td')[7].innerText;
-					$(inrow).children('td:last-child').children('input:button').attr('value', '更新');
+					var sendbutton = $(inrow).children('td:last-child').children('input:button')
+					$(sendbutton).attr('value', '更新');
+					$(sendbutton).bind('click', function (e) {
+						var obj = $(this).closest('tr');
+						var parameters = {id: $(obj).children('input:hidden').val(),
+										  date: $(obj).children('#cashdatepicker').val(),
+										  detail: $(obj).children('#detail').val(),
+										  type: $(obj).children('moneyType').val(),
+										  moneysalesin: $(obj).children('#moneysalesin').val(),
+										  moneyin: $(obj).children('#moneyin').val(),
+										  moneysalesout: $(obj).children('#moneysalesout').val(),
+										  moneyout: $(obj).children('#moneyout').val(),
+										  balance: $(obj).children('#balance').val()
+										 };
+
+						$.ajax({
+							type: "POST",
+							url: '/updatecash',
+							data: parameters,
+							dataType: "json",
+							success: function(data, status, xhr) {
+								var content = $("<tr></tr>")
+												.append("<td>" + $(obj).children('#cashdatepicker').val() + "</td>")
+												.append("<td>" + $(obj).children('#detail').val() + "</td>")
+												.append("<td>" + $(obj).children('#moneyType').children(':selected').text() + "</td>")
+												.append("<td>" + $(obj).children('#moneysalesin').val() + "</td>")
+												.append("<td>" + $(obj).children('#moneyin').val() + "</td>")
+												.append("<td>" + $(obj).children('#moneysalesout').val() + "</td>")
+												.append("<td>" + $(obj).children('#moneyout').val() + "</td>")
+												.append("<td>" + $(obj).children('#balance').val() + "</td>")
+												.append("<td><input type=\"button\" id=\"casheditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
+
+								$(obj).before(content);
+								$(obj).remove();
+							},
+							error: function(xhr, status, error) {
+								alert("サーバへの登録でエラーが発生しました。もう一度更新ボタンを押して下さい。\n" + "[" +  xhr.status + "]");
+							}
+						});
+					});
+					$(sendbutton).after('<input type="hidden" id="updatekey" value="' + $(obj).children('td:last-child').children('input:hidden').val() + '" />')
 					obj.after(inrow);
 
 					// 表示内容は削除
@@ -157,7 +195,7 @@ limitations under the License.
 						<th>残高</th>
 						<th>登録／編集</th>
 					</tr>
-					{{range .}}
+					{{range .Cashes}}
 					<tr>
 						<td class="date">{{.Date}}</td>
 						<td>{{.Detail}}</td>
@@ -167,7 +205,10 @@ limitations under the License.
 						<td class="number">{{.MoneySalesOut}}</td>
 						<td class="number">{{.MoneyOut}}</td>
 						<td class="number">{{.Balance}}</td>
-						<td><input type="button" id="casheditbtn" value="編集" /></td>
+						<td>
+							<input type="button" id="casheditbtn" value="編集" />
+							<input type="hidden" id="updatekey" value="{{.Id}}" />
+						</td>
 					</tr>
 					{{end}}
 					<tr>
@@ -202,7 +243,7 @@ limitations under the License.
 						<th>残高</th>
 						<th>登録／編集</th>
 					</tr>
-					{{range .}}
+					{{range .Cashes}}
 					<tr>
 						<td class="date">{{.Date}}</td>
 						<td>{{.Detail}}</td>
@@ -212,7 +253,10 @@ limitations under the License.
 						<td class="number">{{.MoneySalesOut}}</td>
 						<td class="number">{{.MoneyOut}}</td>
 						<td class="number">{{.Balance}}</td>
-						<td><input type="button" id="bookeditbtn" value="編集" /></td>
+						<td>
+							<input type="button" id="bookeditbtn" value="編集" />
+							<input type="hidden" id="updatekey" value="{{.Id}}" />
+						</td>
 					</tr>
 					{{end}}
 					<tr>

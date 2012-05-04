@@ -20,6 +20,7 @@ import (
 )
 
 type ViewCash struct {
+	Id int64			// 現金データのキーのID
 	Type string 		// 費用種別（通信費、事業主貸、事業主借…）
 	Date string      	// 登録日付
 	Detail string		// 明細
@@ -30,7 +31,8 @@ type ViewCash struct {
 	Balance string		// 残高
 }
 
-func (view *ViewCash) Create(data Cash) {
+func (view *ViewCash) Create(data Cash, id int64) {
+	view.Id = id
 	view.Type = "勘定科目"			// まだ未実装
 	view.Date = data.Date.Format("2006-01-02")
 	view.Detail = data.Detail

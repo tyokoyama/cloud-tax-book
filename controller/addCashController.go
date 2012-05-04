@@ -17,6 +17,7 @@ package controller
 
 import(
 	"appengine"
+	"fmt"
 	"model"
 	"net/http"
 	"strconv"
@@ -28,14 +29,26 @@ func addcash(w http.ResponseWriter, r *http.Request) {
 
 	date := r.FormValue("date")
 	detail := r.FormValue("detail")
+	moneyType := r.FormValue("type")
 	moneysalesin := r.FormValue("moneysalesin")
 	moneyin := r.FormValue("moneyin")
 	moneysalesout := r.FormValue("moneysalesout")
 	moneyout := r.FormValue("moneyout")
 	balance := r.FormValue("balance")
 
+	c.Infof("date = %s", date)
+	c.Infof("detail = %s", detail)
+	c.Infof("moneyType = %s", moneyType)
+	c.Infof("moneysalesin = %s", moneysalesin)
+	c.Infof("moneyin = %s", moneyin)
+	c.Infof("moneysalesout = %s", moneysalesout)
+	c.Infof("moneyout = %s", moneyout)
+	c.Infof("balance = %s", balance)
+
 	var cash model.Cash
 	cash.Date, _ = time.Parse("2006-01-02", date)
+	cash.IsExpense = true
+	cash.Type, _ = strconv.Atoi(moneyType)
 	cash.Detail = detail
 	cash.MoneySalesIn, _ = strconv.ParseInt(moneysalesin, 10, 64)
 	cash.MoneyIn, _ = strconv.ParseInt(moneyin, 10, 64)
@@ -43,13 +56,13 @@ func addcash(w http.ResponseWriter, r *http.Request) {
 	cash.MoneyOut, _ = strconv.ParseInt(moneyout, 10, 64)
 	cash.Balance, _ = strconv.ParseInt(balance, 10, 64)
 
-	_, err := cash.PutNew(c)
+	_, key, err := cash.PutNew(c)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("{error: " + err.Error() + "}"))
 	} else {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "ok"}`))
+		w.Write([]byte(fmt.Sprintf("{\"status\": \"ok\", \"id\": %d}", key.IntID())))
 	}
 }

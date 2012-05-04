@@ -24,8 +24,13 @@ import (
 
 var htmltemplate = template.Must(template.ParseFiles("view/index.html"))
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
 	c := appengine.NewContext(r)
-	cashes, err := model.QueryCash(c)
+	keys, cashes, err := model.QueryCash(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,10 +38,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	var viewcashes = make([]model.ViewCash, len(cashes))
 	for pos, cash := range cashes {
-		viewcashes[pos].Create(cash)
+		viewcashes[pos].Create(cash, keys[pos].IntID())
 	}
 
-	if err := htmltemplate.Execute(w, viewcashes); err != nil {
+	var views struct {
+		Cashes []model.ViewCash
+	}
+
+	views.Cashes = viewcashes
+
+	if err := htmltemplate.Execute(w, views); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
