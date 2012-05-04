@@ -22,4 +22,7 @@ import (
 func init() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/addcash", addcash)
+	http.HandleFunc("/updatecash", updatecash)
+	http.HandleFunc("/addbook", addbook)
+	http.HandleFunc("/updatebook", updatebook)
 }

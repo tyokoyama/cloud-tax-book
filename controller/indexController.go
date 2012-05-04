@@ -36,16 +36,29 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	keybooks, books, err := model.QueryBook(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var viewcashes = make([]model.ViewCash, len(cashes))
 	for pos, cash := range cashes {
 		viewcashes[pos].Create(cash, keys[pos].IntID())
 	}
 
+	var viewbooks = make([]model.ViewBook, len(books))
+	for pos, book := range books {
+		viewbooks[pos].Create(book, keybooks[pos].IntID())
+	}	
+
 	var views struct {
 		Cashes []model.ViewCash
+		Books []model.ViewBook
 	}
 
 	views.Cashes = viewcashes
+	views.Books = viewbooks
 
 	if err := htmltemplate.Execute(w, views); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
