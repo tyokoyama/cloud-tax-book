@@ -17,6 +17,7 @@ package controller
 
 import (
 	"appengine"
+	"fmt"
 	"html/template"
 	"net/http"
 	"model"
@@ -42,6 +43,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var initial model.Initial
+	if err := initial.ReadDatastore(c); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var viewcashes = make([]model.ViewCash, len(cashes))
 	for pos, cash := range cashes {
 		viewcashes[pos].Create(cash, keys[pos].IntID())
@@ -55,10 +62,27 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	var views struct {
 		Cashes []model.ViewCash
 		Books []model.ViewBook
+		StartCash int64
+		StartBook int64
+		CurrentCashBalance string
+		CurrentBookBalance string
 	}
 
 	views.Cashes = viewcashes
 	views.Books = viewbooks
+	views.StartCash = initial.StartCash
+	views.StartBook = initial.StartBook
+	if len(viewcashes) <= 0 {
+		views.CurrentCashBalance = fmt.Sprintf("%d", initial.StartCash)
+	} else {
+		views.CurrentCashBalance = viewcashes[len(viewcashes) - 1].Balance
+	}
+
+	if len(viewbooks) <= 0 {
+		views.CurrentBookBalance = fmt.Sprintf("%d", initial.StartBook)
+	} else {
+		views.CurrentBookBalance = viewbooks[len(viewbooks) - 1].Balance
+	}
 
 	if err := htmltemplate.Execute(w, views); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

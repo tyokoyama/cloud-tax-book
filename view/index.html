@@ -45,7 +45,7 @@ limitations under the License.
 			$("#cashinputbtn").click(function (e) {
 				var parameters = {date: $('#cashdatepicker').val(),
 								  detail: $('#detail').val(),
-								  type: $('moneyType').val(),
+								  type: $('#moneyType').val(),
 								  moneysalesin: $('#moneysalesin').val(),
 								  moneyin: $('#moneyin').val(),
 								  moneysalesout: $('#moneysalesout').val(),
@@ -115,7 +115,7 @@ limitations under the License.
 						var parameters = {id: $(obj[8]).children('input:hidden').val(),
 										  date: $(obj[0]).children('#cashdatepicker').val(),
 										  detail: $(obj[1]).children('#detail').val(),
-										  type: $(obj[2]).children('moneyType').val(),
+										  type: $(obj[2]).children('#moneyType').val(),
 										  moneysalesin: $(obj[3]).children('#moneysalesin').val(),
 										  moneyin: $(obj[4]).children('#moneyin').val(),
 										  moneysalesout: $(obj[5]).children('#moneysalesout').val(),
@@ -155,14 +155,14 @@ limitations under the License.
 				});
 
 			$('#bookinputbtn').click(function (e) {
-				var parameters = {date: $('#bookdatepicker').val(),
-								  detail: $('#detail').val(),
-								  type: $('moneyType').val(),
-								  moneysalesin: $('#moneysalesin').val(),
-								  moneyin: $('#moneyin').val(),
-								  moneysalesout: $('#moneysalesout').val(),
-								  moneyout: $('#moneyout').val(),
-								  balance: $('#balance').val()
+				var parameters = {date: $('#panel2 #bookdatepicker').val(),
+								  detail: $('#panel2 #detail').val(),
+								  type: $('#panel2 #moneyType').val(),
+								  moneysalesin: $('#panel2 #moneysalesin').val(),
+								  moneyin: $('#panel2 #moneyin').val(),
+								  moneysalesout: $('#panel2 #moneysalesout').val(),
+								  moneyout: $('#panel2 #moneyout').val(),
+								  balance: $('#panel2 #balance').val()
 								 };
 
 				$.ajax({
@@ -172,24 +172,24 @@ limitations under the License.
 					dataType: "json",
 					success: function(data, status, xhr) {
 						var content = $("<tr></tr>")
-										.append("<td>" + $('#bookdatepicker').val() + "</td>")
-										.append("<td>" + $('#detail').val() + "</td>")
-										.append("<td>" + $('#moneyType').children(':selected').text() + "</td>")
-										.append("<td>" + $('#moneysalesin').val() + "</td>")
-										.append("<td>" + $('#moneyin').val() + "</td>")
-										.append("<td>" + $('#moneysalesout').val() + "</td>")
-										.append("<td>" + $('#moneyout').val() + "</td>")
-										.append("<td>" + $('#balance').val() + "</td>")
+										.append("<td>" + $('#panel2 #bookdatepicker').val() + "</td>")
+										.append("<td>" + $('#panel2 #detail').val() + "</td>")
+										.append("<td>" + $('#panel2 #moneyType').children(':selected').text() + "</td>")
+										.append("<td>" + $('#panel2 #moneysalesin').val() + "</td>")
+										.append("<td>" + $('#panel2 #moneyin').val() + "</td>")
+										.append("<td>" + $('#panel2 #moneysalesout').val() + "</td>")
+										.append("<td>" + $('#panel2 #moneyout').val() + "</td>")
+										.append("<td>" + $('#panel2 #balance').val() + "</td>")
 										.append("<td><input type=\"button\" id=\"bookeditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
 
-						$('#bookdatepicker').val('');
-						$('#detail').val('');
-						$('#moneyType').val('');
-						$('#moneysalesin').val('');
-						$('#moneyin').val('');
-						$('#moneysalesout').val('');
-						$('#moneyout').val('');
-						$('#balance').val('');
+						$('#panel2 #bookdatepicker').val('');
+						$('#panel2 #detail').val('');
+						$('#panel2 #moneyType').val('');
+						$('#panel2 #moneysalesin').val('');
+						$('#panel2 #moneyin').val('');
+						$('#panel2 #moneysalesout').val('');
+						$('#panel2 #moneyout').val('');
+						$('#panel2 #balance').val('');
 
 						$('#panel2 .list tbody tr:last-child').before(content);
 					},
@@ -227,7 +227,7 @@ limitations under the License.
 						var parameters = {id: $(obj[8]).children('input:hidden').val(),
 										  date: $(obj[0]).children('#bookdatepicker').val(),
 										  detail: $(obj[1]).children('#detail').val(),
-										  type: $(obj[2]).children('moneyType').val(),
+										  type: $(obj[2]).children('#moneyType').val(),
 										  moneysalesin: $(obj[3]).children('#moneysalesin').val(),
 										  moneyin: $(obj[4]).children('#moneyin').val(),
 										  moneysalesout: $(obj[5]).children('#moneysalesout').val(),
@@ -237,7 +237,7 @@ limitations under the License.
 
 						$.ajax({
 							type: "POST",
-							url: '/updatecash',
+							url: '/updatebook',
 							data: parameters,
 							dataType: "json",
 							success: function(data, status, xhr) {
@@ -266,6 +266,14 @@ limitations under the License.
 					$(obj).remove();
 				});
 
+			$('#updatestartcash').click(function (e) {
+				updateInitial();
+			});
+
+			$('#updatestartbook').click(function (e) {
+				updateInitial();
+			});
+
 			$('#tabset').tabs('destroy');
 			$('#tabset > ul').tabs();
 
@@ -275,6 +283,25 @@ limitations under the License.
 
 			$('#tabset').tabs(options);
 		});
+
+		function updateInitial() {
+			var parameters = {
+				startcash: $('#startcash').val(),
+				startbook: $('#startbook').val()
+			};
+			$.ajax({
+				type: "POST",
+				url: '/updateinitial',
+				data: parameters,
+				dataType: "json",
+				success: function(data, status, xhr) {
+					alert("前年からの繰越／元入金を更新しました。");
+				},
+				error: function(xhr, status, error) {
+					alert("サーバへの登録でエラーが発生しました。もう一度更新ボタンを押して下さい。\n" + "[" +  xhr.status + "]");
+				}
+			});
+		}
 	</script>
 </head>
 <body>
@@ -286,6 +313,9 @@ limitations under the License.
 				<li><a href="#panel2">預金出納帳</a></li>
 			</ul>
 			<div id="panel1">
+				<label for="startcash">前年からの繰越／元入金</label>
+				<input type="number" id="startcash" value="{{.StartCash}}" />
+				<input type="button" id="updatestartcash" value="更新" />
 				<table class="list">
 					<tr>
 						<th class="date">登録日</th>
@@ -328,12 +358,15 @@ limitations under the License.
 						<td><input class="number" type="number" id="moneyin" /></td>
 						<td><input class="number" type="number" id="moneysalesout" /></td>
 						<td><input class="number" type="number" id="moneyout" /></td>
-						<td><div class="number" id="balance"></div></td>
+						<td><div class="number" id="balance">{{.CurrentCashBalance}}</div></td>
 						<td><input type="button" id="cashinputbtn" value="登録" /></td>
 					</tr>
 				</table>
 			</div>
 			<div id="panel2">
+				<label for="startbook">前年からの繰越／元入金</label>
+				<input type="number" id="startbook" value="{{.StartBook}}" />
+				<input type="button" id="updatestartbook" value="更新" />
 				<table class="list">
 					<tr>
 						<th class="date">登録日</th>
@@ -376,7 +409,7 @@ limitations under the License.
 						<td><input class="number" type="number" id="moneyin" /></td>
 						<td><input class="number" type="number" id="moneysalesout" /></td>
 						<td><input class="number" type="number" id="moneyout" /></td>
-						<td><div class="number" id="balance"></div></td>
+						<td><div class="number" id="balance">{{.CurrentBookBalance}}</div></td>
 						<td><input type="button" id="bookinputbtn" value="登録" /></td>
 					</tr>
 				</table>

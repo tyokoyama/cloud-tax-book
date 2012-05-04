@@ -16,6 +16,9 @@ handlers:
   static_files: css/images/\1
   upload: css/images/(.*\.png)
 
+- url: /images
+  static_dir: css/images
+
 - url: /.*
   script: _go_app
   login: admin

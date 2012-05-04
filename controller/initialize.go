@@ -25,4 +25,5 @@ func init() {
 	http.HandleFunc("/updatecash", updatecash)
 	http.HandleFunc("/addbook", addbook)
 	http.HandleFunc("/updatebook", updatebook)
+	http.HandleFunc("/updateinitial", updateinitial)
 }
