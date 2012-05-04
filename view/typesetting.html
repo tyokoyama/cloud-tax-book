@@ -26,6 +26,50 @@ limitations under the License.
 		google.load("jqueryui", "1.8");
 	</script>
 	<script>
+		$(function() {
+			$('#createType').click(function(e) {
+				var parameters = {
+					 name: $('#name').val()
+					,expense: $('#expense:checked:enabled').val()
+					,detail: $('#detail').val()
+				};
+
+				$.ajax({
+					type: "POST",
+					url: '/addtype',
+					data: parameters,
+					dataType: "json",
+					success: function(data, status, xhr) {
+						// 入力欄をクリア
+						$('#name').val('');
+						$('#expense').removeAttr('checked');
+						$('#detail').val('');
+
+						var contents =
+						 		'<section><h2>勘定科目：' + data.Name + '</h2>'
+								+ '<div><p>' 
+								+ ((data.IsExpense) ? '経費扱い' : '経費扱いにしない')
+								+ '</p>'
+								+ '</div>'
+								+ '<div>' 
+								+ '詳細:' 
+								+ '<p>' 
+								+ data.Detail
+								+ '</p>'
+								+ '</div>'
+								+ '<input type="button" id="updatebtn" value="編集" />'
+								+ '<input type="button" id="deletebtn" value="削除" />'
+							+ '</section>';
+
+						var obj = $('#typelist').children(':last-child');
+						$('#typelist').children(':last-child').after(contents);
+					},
+					error: function(xhr, status, error) {
+						alert('サーバへの登録でエラーが発生しました。もう一度登録してください。' + '[' + xhr.status + ']');
+					}
+				});
+			});
+		});
 	</script>
 </head>
 <body>
@@ -36,11 +80,15 @@ limitations under the License.
 	</nav>
 	勘定科目設定
 	<article id="contents">
-		<section id="contents">
+		<section class="contents" id="newtype">
 			<h2>勘定科目の新規追加</h2>
 			<div>
 				<label for="name">勘定科目名：</label>
 				<input type="text" name="name" id="name" />
+			</div>
+			<div>
+				<label for="expense">経費</label>
+				<input type="checkbox" name="expense" id="expense" value="1" />
 			</div>
 			<div>
 				<div>
@@ -50,30 +98,32 @@ limitations under the License.
 					<textarea rows="20" cols="70" name="detail" id="detail"></textarea>
 				</div>
 			</div>
-			<input type="button" value="登録" />
+			<input type="button" id="createType" value="登録" />
 		</section>
-		{{range .}}
-		<section id="contents">
-			<h2>勘定科目：{{.Name}}</h2>
-			<div>
-				<p>
-					{{if .IsExpense}}
-						経費扱い
-					{{else}}
-						経費扱いにしない
-					{{end}}
-				</p>
-			</div>
-			<div>
-				詳細:
-				<p>
-					{{.Detail}}
-				</p>
-			</div>
-			<input type="button" id="updatebtn" value="編集" />
-			<input type="button" id="deletebtn" value="削除" />
+		<section class="contents" id="typelist">
+			{{range .}}
+			<section>
+				<h2>勘定科目：{{.Name}}</h2>
+				<div>
+					<p>
+						{{if .IsExpense}}
+							経費扱い
+						{{else}}
+							経費扱いにしない
+						{{end}}
+					</p>
+				</div>
+				<div>
+					詳細:
+					<p>
+						{{.Detail}}
+					</p>
+				</div>
+				<input type="button" id="updatebtn" value="編集" />
+				<input type="button" id="deletebtn" value="削除" />
+			</section>
+			{{end}}
 		</section>
-		{{end}}
 	</article>
 </body>
 </html>

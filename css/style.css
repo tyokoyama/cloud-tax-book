@@ -21,7 +21,7 @@ article#contents {
 	width: 100px;
 }
 
-section#contents {
+section.contents {
 	margin: auto;
 	width: 500px;
 }

@@ -15,19 +15,14 @@ limitations under the License.
 */
 package controller
 
-import (
+import(
+	// "appengine"
+	// "fmt"
+	// "model"
 	"net/http"
+	// "strconv"
 )
 
-func init() {
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/addcash", addcash)
-	http.HandleFunc("/updatecash", updatecash)
-	http.HandleFunc("/addbook", addbook)
-	http.HandleFunc("/updatebook", updatebook)
-	http.HandleFunc("/updateinitial", updateinitial)
-	http.HandleFunc("/typesetting", typesetting)
-	http.HandleFunc("/addtype", addtype)
-	http.HandleFunc("/updatetype", updatetype)
-	http.HandleFunc("/deletetype", deletetype)
+func deletetype(w http.ResponseWriter, r *http.Request) {
+	
 }
