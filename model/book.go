@@ -1,0 +1,35 @@
+/*
+Copyright 2012 Takashi Yokoyama
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package model
+
+import (
+	"appengine"
+	"appengine/datastore"
+	"time"
+)
+
+type Book struct {
+	Type int 									// 費用種別（通信費、事業主貸、事業主借…）
+	Date time.Time      						// 登録日付
+	IsExpense bool `datastore:",noindex"`		// 経費かどうか（true：経費／false：経費ではない）
+	Detail string `datastore:",noindex"`		// 明細
+	MoneySalesIn int64 `datastore:",noindex"`	// 預金売上入金
+	MoneyIn int64 `datastore:",noindex"`		// その他入金
+	MoneySalesOut int64 `datastore:",noindex"`	// 預金仕入
+	MoneyOut int64 `datastore:",noindex"`		// その他出金
+	Balance int64 `datastore:",noindex"`		// 残高
+}
+
