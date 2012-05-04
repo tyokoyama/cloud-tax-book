@@ -33,3 +33,64 @@ type Book struct {
 	Balance int64 `datastore:",noindex"`		// 残高
 }
 
+func QueryBook(c appengine.Context) ([]*datastore.Key, []Book, error) {
+	if c == nil {
+		return nil, nil, nil
+	}
+
+	q := datastore.NewQuery("Book")
+	if count, err := q.Count(c); err != nil {
+		return nil, nil, err
+	} else {
+		books := make([]Book, 0, count)
+		keys, getErr := q.GetAll(c, &books)
+		if getErr != nil {
+			return nil, nil, getErr
+		}
+
+		return keys, books, nil
+	}
+
+	return nil, nil, nil
+}
+
+// データストアからのGET
+func GetBook(c appengine.Context, key *datastore.Key) (*Book, error) {
+	if c == nil || key == nil {
+		return nil, nil
+	}
+
+	var book Book
+
+	if err := datastore.Get(c, key, &book); err != nil {
+		return nil, err
+	}
+
+	return &book, nil
+}
+
+// データストアへのPUT（新規登録）
+func (book *Book)PutNew(c appengine.Context) (*Book, *datastore.Key, error) {
+	if c == nil {
+		return nil, nil, nil
+	}
+
+	key := datastore.NewIncompleteKey(c, "Book", nil)
+
+	return book.Put(c, key)
+}
+
+// データストアへのPUT
+func (book *Book)Put(c appengine.Context, key *datastore.Key) (*Book, *datastore.Key, error) {
+	if c == nil || key == nil {
+		return nil, nil, nil
+	}
+
+	if putKey, err := datastore.Put(c, key, book); err != nil {
+		return nil, nil, err
+	} else {
+		return book, putKey, nil
+	}
+
+	return nil, nil, nil
+}
