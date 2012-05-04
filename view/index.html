@@ -27,13 +27,24 @@ limitations under the License.
 	</script>
 	<script>
 		$(function() {
-			$("input[type='text']").keypress(function(event) {
+			$("input").keypress(function(event) {
 				if(!event) var event = window.event;
 				if(event.keyCode == 13) {
 					return false;
 				}
 			});
 			
+			$("input[type='number']").focusout(function(e) {
+				var row = $(this).closest('tr').children('td');
+				var balance = parseInt($(row[7]).children('#balance').text());
+				var moneyin = parseInt($(row[3]).children('#moneysalesin').val()) + parseInt($(row[4]).children('#moneyin').val());
+				var moneyout = parseInt($(row[5]).children('#moneysalesout').val()) + parseInt($(row[6]).children('#moneyout').val());
+				var newbalance = balance - moneyout + moneyin;
+				if(!isNaN(newbalance)) {
+					$(row[7]).children('#balance').text(balance - moneyout + moneyin);
+				}
+			});
+
 			$("#cashdatepicker").datepicker({
 				dateFormat: 'yy-mm-dd'
 			});
@@ -50,7 +61,7 @@ limitations under the License.
 								  moneyin: $('#moneyin').val(),
 								  moneysalesout: $('#moneysalesout').val(),
 								  moneyout: $('#moneyout').val(),
-								  balance: $('#balance').val()
+								  balance: $('#balance').text()
 								 };
 
 				$.ajax({
@@ -67,7 +78,7 @@ limitations under the License.
 										.append("<td>" + $('#moneyin').val() + "</td>")
 										.append("<td>" + $('#moneysalesout').val() + "</td>")
 										.append("<td>" + $('#moneyout').val() + "</td>")
-										.append("<td>" + $('#balance').val() + "</td>")
+										.append("<td>" + $('#balance').text() + "</td>")
 										.append("<td><input type=\"button\" id=\"casheditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
 
 						$('#cashdatepicker').val('');
@@ -77,7 +88,6 @@ limitations under the License.
 						$('#moneyin').val('');
 						$('#moneysalesout').val('');
 						$('#moneyout').val('');
-						$('#balance').val('');
 
 						$('#panel1 .list tbody tr:last-child').before(content);
 					},
@@ -120,7 +130,7 @@ limitations under the License.
 										  moneyin: $(obj[4]).children('#moneyin').val(),
 										  moneysalesout: $(obj[5]).children('#moneysalesout').val(),
 										  moneyout: $(obj[6]).children('#moneyout').val(),
-										  balance: $(obj[7]).children('#balance').val()
+										  balance: $(obj[7]).children('#balance').text()
 										 };
 
 						$.ajax({
@@ -137,7 +147,7 @@ limitations under the License.
 												.append("<td>" + $(obj).children('#moneyin').val() + "</td>")
 												.append("<td>" + $(obj).children('#moneysalesout').val() + "</td>")
 												.append("<td>" + $(obj).children('#moneyout').val() + "</td>")
-												.append("<td>" + $(obj).children('#balance').val() + "</td>")
+												.append("<td>" + $(obj).children('#balance').text() + "</td>")
 												.append("<td><input type=\"button\" id=\"casheditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
 								$(obj).closest('tr').before(content);
 								$(obj).remove();
@@ -162,7 +172,7 @@ limitations under the License.
 								  moneyin: $('#panel2 #moneyin').val(),
 								  moneysalesout: $('#panel2 #moneysalesout').val(),
 								  moneyout: $('#panel2 #moneyout').val(),
-								  balance: $('#panel2 #balance').val()
+								  balance: $('#panel2 #balance').text()
 								 };
 
 				$.ajax({
@@ -179,7 +189,7 @@ limitations under the License.
 										.append("<td>" + $('#panel2 #moneyin').val() + "</td>")
 										.append("<td>" + $('#panel2 #moneysalesout').val() + "</td>")
 										.append("<td>" + $('#panel2 #moneyout').val() + "</td>")
-										.append("<td>" + $('#panel2 #balance').val() + "</td>")
+										.append("<td>" + $('#panel2 #balance').text() + "</td>")
 										.append("<td><input type=\"button\" id=\"bookeditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
 
 						$('#panel2 #bookdatepicker').val('');
@@ -189,7 +199,6 @@ limitations under the License.
 						$('#panel2 #moneyin').val('');
 						$('#panel2 #moneysalesout').val('');
 						$('#panel2 #moneyout').val('');
-						$('#panel2 #balance').val('');
 
 						$('#panel2 .list tbody tr:last-child').before(content);
 					},
@@ -232,7 +241,7 @@ limitations under the License.
 										  moneyin: $(obj[4]).children('#moneyin').val(),
 										  moneysalesout: $(obj[5]).children('#moneysalesout').val(),
 										  moneyout: $(obj[6]).children('#moneyout').val(),
-										  balance: $(obj[7]).children('#balance').val()
+										  balance: $(obj[7]).children('#balance').text()
 										 };
 
 						$.ajax({
@@ -249,7 +258,7 @@ limitations under the License.
 												.append("<td>" + $(obj).children('#moneyin').val() + "</td>")
 												.append("<td>" + $(obj).children('#moneysalesout').val() + "</td>")
 												.append("<td>" + $(obj).children('#moneyout').val() + "</td>")
-												.append("<td>" + $(obj).children('#balance').val() + "</td>")
+												.append("<td>" + $(obj).children('#balance').text() + "</td>")
 												.append("<td><input type=\"button\" id=\"bookeditbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
 								$(obj).closest('tr').before(content);
 								$(obj).remove();

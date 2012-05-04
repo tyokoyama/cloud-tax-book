@@ -32,7 +32,7 @@ func createInitialKey(c appengine.Context) *datastore.Key {
 func (init *Initial) ReadDatastore(c appengine.Context) error {
 	key := createInitialKey(c)
 
-	if err := datastore.Get(c, key, init); err != nil || err != datastore.ErrNoSuchEntity {
+	if err := datastore.Get(c, key, init); err != nil && err != datastore.ErrNoSuchEntity {
 		return err
 	} else if(err == datastore.ErrNoSuchEntity) {
 		init.StartCash = 0
