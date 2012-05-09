@@ -19,7 +19,6 @@ import(
 	"appengine"
 	"model"
 	"net/http"
-//	"strconv"
 	"html/template"
 )
 
@@ -29,9 +28,20 @@ func typesetting(w http.ResponseWriter, r *http.Request) {
 
 	c.Infof("typesetting")
 
-	_, types, _ := model.QueryType(c)
+	keys, types, _ := model.QueryType(c)
 
-	if err := htmltypesettingtemplate.Execute(w, types); err != nil {
+	var views = make(
+		[]struct {
+			Id int64
+			Type model.Type
+		}, len(keys))
+
+	for i := 0; i < len(views); i++ {
+		views[i].Id = keys[i].IntID()
+		views[i].Type = types[i]
+	}
+
+	if err := htmltypesettingtemplate.Execute(w, views); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

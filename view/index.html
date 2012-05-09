@@ -363,9 +363,9 @@ limitations under the License.
 						<td><input type="text" id="detail" /></td>
 						<td>
 							<select id="moneyType">
-								<option value="1">通信費</option>
-								<option value="2">事業主借</option>
-								<option value="3">事業主貸</option>
+								{{range .Category}}
+								<option value="{{.Id}}">{{.Name}}</option>
+								{{end}}
 							</select>
 						</td>
 						<td><input class="number" type="number" id="moneysalesin" /></td>
@@ -414,9 +414,9 @@ limitations under the License.
 						<td><input type="text" id="detail" /></td>
 						<td>
 							<select id="moneyType">
-								<option value="1">通信費</option>
-								<option value="2">事業主借</option>
-								<option value="3">事業主貸</option>
+								{{range .Category}}
+								<option value="{{.Id}}">{{.Name}}</option>
+								{{end}}
 							</select>
 						</td>
 						<td><input class="number" type="number" id="moneysalesin" /></td>

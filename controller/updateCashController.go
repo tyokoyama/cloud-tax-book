@@ -53,7 +53,7 @@ func updatecash(w http.ResponseWriter, r *http.Request) {
 	keyid, _ = strconv.ParseInt(id, 10, 64)
 	cash.Date, _ = time.Parse("2006-01-02", date)
 	cash.IsExpense = true
-	cash.Type, _ = strconv.Atoi(moneyType)
+	cash.Type, _ = strconv.ParseInt(moneyType, 10, 64)
 	cash.Detail = detail
 	cash.MoneySalesIn, _ = strconv.ParseInt(moneysalesin, 10, 64)
 	cash.MoneyIn, _ = strconv.ParseInt(moneyin, 10, 64)

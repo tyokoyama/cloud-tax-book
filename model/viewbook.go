@@ -33,7 +33,7 @@ type ViewBook struct {
 
 func (view *ViewBook) Create(data Book, id int64) {
 	view.Id = id
-	view.Type = "勘定科目"			// まだ未実装
+	view.Type = data.TypeName
 	view.Date = data.Date.Format("2006-01-02")
 	view.Detail = data.Detail
 	view.MoneySalesIn = fmt.Sprintf("%d", data.MoneySalesIn)

@@ -45,11 +45,11 @@ func addtype(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := newType.PutNew(c); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"s\"}", err.Error())))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
 	} else {
 		if response, jsonerr := json.Marshal(&newType); jsonerr != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("{\"error\": \"s\"}", jsonerr.Error())))
+			w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", jsonerr.Error())))
 		} else {
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)

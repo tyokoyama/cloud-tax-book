@@ -57,7 +57,7 @@ limitations under the License.
 								+ data.Detail
 								+ '</p>'
 								+ '</div>'
-								+ '<input type="button" id="updatebtn" value="編集" />'
+								+ '<input type="button" id="editbtn" value="編集" />'
 								+ '<input type="button" id="deletebtn" value="削除" />'
 							+ '</section>';
 
@@ -69,6 +69,120 @@ limitations under the License.
 					}
 				});
 			});
+
+			$('#editbtn').live(
+				'click',
+				function(e) {
+					var target = $(this).closest('section');
+					var name = $(target).children('input#name').val();
+					var expense = $(target).children('input#expense').val();
+					var detail = $(target).children('input#detail').val();
+					var id = $(target).children('input#id').val();
+
+					var contents = '<section class="contents">'
+								 + '<h2>勘定科目の編集</h2>'
+								 + '<div>'
+								 + '<label for="name">勘定科目名：</label>'
+								 + '<input type="text" name="name" id="name"'
+								 + 'value="' + name + '" />'
+								 + '</div>'
+								 + '<div>'
+								 + '<label for="expense">経費</label>'
+								 + '<input type="checkbox" name="expense" id="expense" value="1" '
+								 + ((expense) ? 'checked />' : '/>')
+								 + '</div>'
+								 + '<div>'
+								 + '<div>'
+								 + '<label for="detail">詳細（補足など）：</label>'
+								 + '</div>'
+								 + '<div>'
+								 + '<textarea rows="20" cols="70" name="detail" id="detail">'
+								 + detail
+								 + '</textarea>'
+								 + '</div>'
+								 + '</div>'
+								 + '<input type="hidden" value="' + id + '" />'
+								 + '<input type="button" id="updatebtn" value="更新" />'
+								 + '<input type="button" id="cancelbtn" value="キャンセル" />'
+								 + '</section>'
+								 ;
+					$(target).after(contents);
+				}
+			);
+
+			$('#cancelbtn').live(
+				'click',
+				function(e) {
+					$(this).closest('section').remove();
+				}
+			);
+
+			$('#updatebtn').live(
+				'click',
+				function(e) {
+					var target = $(this).closest('section');
+					var parameters = {
+						 name: $(target).children('#name').val()
+						,expense: $(target).children('#expense:checked:enabled').val()
+						,detail: $(target).children('#detail').val()
+						,id : $(target).children('#id').val()
+					};
+
+					$.ajax({
+						type: "POST",
+						url: '/updatetype',
+						data: parameters,
+						dataType: "json",
+						success: function(data, status, xhr) {
+							var contents =
+							 		'<section><h2>勘定科目：' + data.Name + '</h2>'
+									+ '<div><p>' 
+									+ ((data.IsExpense) ? '経費扱い' : '経費扱いにしない')
+									+ '</p>'
+									+ '</div>'
+									+ '<div>' 
+									+ '詳細:' 
+									+ '<p>' 
+									+ data.Detail
+									+ '</p>'
+									+ '</div>'
+									+ '<input type="button" id="editbtn" value="編集" />'
+									+ '<input type="button" id="deletebtn" value="削除" />'
+								+ '</section>';
+
+							$(target).after(contents);
+						},
+						error: function(xhr, status, error) {
+							alert('サーバでの更新でエラーが発生しました。もう一度登録してください。' + '[' + xhr.status + ']');
+						}
+					});					
+				}
+			);
+
+			$('#deletebtn').live(
+				'click',
+				function(e) {
+					if(window.confirm('削除しますか？')) {
+						var target = $(this).closest('section');
+						var id = $(target).children('input#id').val();
+
+						var parameters = {id : id};
+
+						$.ajax({
+							type: "POST",
+							url: '/deletetype',
+							data: parameters,
+							dataType: "json",
+							success: function(data, status, xhr) {
+								$(target).remove();
+							},
+							error: function(xhr, status, error) {
+								alert('サーバでの削除でエラーが発生しました。もう一度削除してください。' + '[' + xhr.status + ']');
+							}
+						});
+					}
+				}
+			);
 		});
 	</script>
 </head>
@@ -103,10 +217,10 @@ limitations under the License.
 		<section class="contents" id="typelist">
 			{{range .}}
 			<section>
-				<h2>勘定科目：{{.Name}}</h2>
+				<h2>勘定科目：{{.Type.Name}}</h2>
 				<div>
 					<p>
-						{{if .IsExpense}}
+						{{if .Type.IsExpense}}
 							経費扱い
 						{{else}}
 							経費扱いにしない
@@ -116,10 +230,15 @@ limitations under the License.
 				<div>
 					詳細:
 					<p>
-						{{.Detail}}
+						{{.Type.Detail}}
 					</p>
 				</div>
-				<input type="button" id="updatebtn" value="編集" />
+
+				<input type="hidden" id="name" value="{{.Type.Name}}" />
+				<input type="hidden" id="expense" value="{{.Type.IsExpense}}" />
+				<input type="hidden" id="detail" value="{{.Type.Detail}}" />
+				<input type="hidden" id="id" value="{{.Id}}" />
+				<input type="button" id="editbtn" value="編集" />
 				<input type="button" id="deletebtn" value="削除" />
 			</section>
 			{{end}}

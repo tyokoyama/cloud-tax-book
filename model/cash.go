@@ -22,9 +22,12 @@ import (
 )
 
 type Cash struct {
-	Type int 									// 費用種別（通信費、事業主貸、事業主借…）
+	Type int64 									// 費用種別（通信費、事業主貸、事業主借…）（勘定科目データのキーのID）
 	TypeName string `datastore:",noindex"`		// 費用種別名
 	Date time.Time      						// 登録日付
+	ExpenseKeyId int64 `datastore:",noindex"`	// 経費帳へのキー
+	NonExpenseKeyId int64 `datastore:",noindex"` // 債権債務帳へのキー
+	IsCopied bool 								// 転記済みかどうか。
 	IsExpense bool `datastore:",noindex"`		// 経費かどうか（true：経費／false：経費ではない）
 	Detail string `datastore:",noindex"`		// 明細
 	MoneySalesIn int64 `datastore:",noindex"`	// 現金売上入金

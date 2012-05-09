@@ -61,6 +61,20 @@ func GetType(c appengine.Context, key *datastore.Key) (*Type, error) {
 	return &setting, nil
 }
 
+func DeleteType(c appengine.Context, id int64) error {
+	if c == nil || id == 0 {
+		return nil
+	}
+
+	key := datastore.NewKey(c, "Type", "", id, nil)
+
+	if err := datastore.Delete(c, key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (setting *Type) PutNew(c appengine.Context) (*Type, error) {
 	if c == nil {
 		return nil, nil
@@ -70,6 +84,16 @@ func (setting *Type) PutNew(c appengine.Context) (*Type, error) {
 
 	return setting.Put(c, key)
 
+}
+
+func (setting *Type) PutFromId(c appengine.Context, id int64) (*Type, error) {
+	if c == nil || id == 0 {
+		return nil, nil
+	}
+
+	key := datastore.NewKey(c, "Type", "", id, nil)
+
+	return setting.Put(c, key)
 }
 
 func (setting *Type) Put(c appengine.Context, key *datastore.Key) (*Type, error) {

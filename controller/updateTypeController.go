@@ -16,13 +16,48 @@ limitations under the License.
 package controller
 
 import(
-	// "appengine"
-	// "fmt"
-	// "model"
+	"appengine"
+	"encoding/json"
+	"fmt"
+	"model"
 	"net/http"
-	// "strconv"
+	"strconv"
 )
 
 func updatetype(w http.ResponseWriter, r *http.Request) {
-	
+	c := appengine.NewContext(r)
+
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+	name := r.FormValue("name")
+	expense := r.FormValue("expense")
+	detail := r.FormValue("detail")
+
+	c.Infof("name = %s", name)
+	c.Infof("expense = %s", expense)
+	c.Infof("detail = %s", detail)
+	c.Infof("id = %d", id)
+
+	var updateType model.Type
+	updateType.Name = name
+	if expense == "" {
+		updateType.IsExpense = false
+	} else {
+		updateType.IsExpense = true
+	}
+	updateType.Detail = detail
+
+	if _, err := updateType.PutFromId(c, id); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+	} else {
+		if response, jsonerr := json.Marshal(&updateType); jsonerr != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", jsonerr.Error())))
+		} else {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(response)
+		}
+	}
+
 }

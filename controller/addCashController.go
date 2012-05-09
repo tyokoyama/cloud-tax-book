@@ -17,6 +17,7 @@ package controller
 
 import(
 	"appengine"
+	"appengine/datastore"
 	"fmt"
 	"model"
 	"net/http"
@@ -47,8 +48,15 @@ func addcash(w http.ResponseWriter, r *http.Request) {
 
 	var cash model.Cash
 	cash.Date, _ = time.Parse("2006-01-02", date)
-	cash.IsExpense = true
-	cash.Type, _ = strconv.Atoi(moneyType)
+	cash.Type, _ = strconv.ParseInt(moneyType, 10, 64)
+	if data, err := model.GetType(c, datastore.NewKey(c, "Type", "", cash.Type, nil)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + err.Error() + "}"))
+		return
+	} else {
+		cash.TypeName = data.Name
+		cash.IsExpense = data.IsExpense
+	}
 	cash.Detail = detail
 	cash.MoneySalesIn, _ = strconv.ParseInt(moneysalesin, 10, 64)
 	cash.MoneyIn, _ = strconv.ParseInt(moneyin, 10, 64)

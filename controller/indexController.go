@@ -43,6 +43,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	keytypes, types, err := model.QueryType(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var initial model.Initial
 	if err := initial.ReadDatastore(c); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -57,11 +63,17 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	var viewbooks = make([]model.ViewBook, len(books))
 	for pos, book := range books {
 		viewbooks[pos].Create(book, keybooks[pos].IntID())
-	}	
+	}
+
+	var viewtypes = make([]model.ViewType, len(types))
+	for pos, t := range types {
+		viewtypes[pos].Create(t, keytypes[pos].IntID())
+	}
 
 	var views struct {
 		Cashes []model.ViewCash
 		Books []model.ViewBook
+		Category []model.ViewType
 		StartCash int64
 		StartBook int64
 		CurrentCashBalance string
@@ -70,6 +82,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	views.Cashes = viewcashes
 	views.Books = viewbooks
+	views.Category = viewtypes
 	views.StartCash = initial.StartCash
 	views.StartBook = initial.StartBook
 	if len(viewcashes) <= 0 {

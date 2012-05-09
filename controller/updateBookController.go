@@ -53,7 +53,7 @@ func updatebook(w http.ResponseWriter, r *http.Request) {
 	keyid, _ = strconv.ParseInt(id, 10, 64)
 	book.Date, _ = time.Parse("2006-01-02", date)
 	book.IsExpense = true
-	book.Type, _ = strconv.Atoi(moneyType)
+	book.Type, _ = strconv.ParseInt(moneyType, 10, 64)
 	book.Detail = detail
 	book.MoneySalesIn, _ = strconv.ParseInt(moneysalesin, 10, 64)
 	book.MoneyIn, _ = strconv.ParseInt(moneyin, 10, 64)

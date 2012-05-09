@@ -16,13 +16,26 @@ limitations under the License.
 package controller
 
 import(
-	// "appengine"
-	// "fmt"
-	// "model"
+	"appengine"
+	"fmt"
+	"model"
 	"net/http"
-	// "strconv"
+	"strconv"
 )
 
 func deletetype(w http.ResponseWriter, r *http.Request) {
-	
+	c := appengine.NewContext(r)
+
+	id, _ := strconv.ParseInt(r.FormValue("id"), 10, 64)
+
+	c.Infof("id = %d", id)
+
+	if err := model.DeleteType(c, id); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+	} else {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf("{\"status\": \"ok\"}")))
+	}
 }
