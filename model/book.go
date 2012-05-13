@@ -37,12 +37,36 @@ type Book struct {
 	Balance int64 `datastore:",noindex"`		// 残高
 }
 
+const kindName = "Book"
+
 func QueryBook(c appengine.Context) ([]*datastore.Key, []Book, error) {
 	if c == nil {
 		return nil, nil, nil
 	}
 
-	q := datastore.NewQuery("Book")
+	q := datastore.NewQuery(kindName)
+	if count, err := q.Count(c); err != nil {
+		return nil, nil, err
+	} else {
+		books := make([]Book, 0, count)
+		keys, getErr := q.GetAll(c, &books)
+		if getErr != nil {
+			return nil, nil, getErr
+		}
+
+		return keys, books, nil
+	}
+
+	return nil, nil, nil
+}
+
+// 転記していないエンティティを取得する。
+func QueryBookCopyYet(c appengine.Context) ([]*datastore.Key, []Book, error) {
+	if c == nil {
+		return nil, nil, nil
+	}
+
+	q := datastore.NewQuery(kindName).Filter("IsCopied = ", false)
 	if count, err := q.Count(c); err != nil {
 		return nil, nil, err
 	} else {
@@ -79,7 +103,7 @@ func (book *Book)PutNew(c appengine.Context) (*Book, *datastore.Key, error) {
 		return nil, nil, nil
 	}
 
-	key := datastore.NewIncompleteKey(c, "Book", nil)
+	key := datastore.NewIncompleteKey(c, kindName, nil)
 
 	return book.Put(c, key)
 }

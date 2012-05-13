@@ -12,12 +12,15 @@ handlers:
   static_files: css/\1
   upload: css/(.*\.css)
 
-- url: /(.*\.png)
-  static_files: css/images/\1
-  upload: css/images/(.*\.png)
+- url: /css/images/
+  static_dir: css/images
 
 - url: /images
   static_dir: css/images
+
+- url: /(.*\.png)
+  static_files: css/images/\1
+  upload: css/images/(.*\.png)
 
 - url: /.*
   script: _go_app
