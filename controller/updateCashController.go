@@ -18,9 +18,11 @@ package controller
 import(
 	"appengine"
 	"appengine/datastore"
+	"appengine/taskqueue"
 	"fmt"
 	"model"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -48,18 +50,57 @@ func updatecash(w http.ResponseWriter, r *http.Request) {
 	c.Infof("moneyout = %s", moneyout)
 	c.Infof("balance = %s", balance)
 
-	var cash model.Cash
 	var keyid int64
 	keyid, _ = strconv.ParseInt(id, 10, 64)
+
+	cash, getErr := model.GetCash(c, datastore.NewKey(c, "Cash", "", keyid, nil))
+	if getErr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + getErr.Error() + "}"))
+		return 
+	}
+
 	cash.Date, _ = time.Parse("2006-01-02", date)
-	cash.IsExpense = true
 	cash.Type, _ = strconv.ParseInt(moneyType, 10, 64)
+
+	if data, err := model.GetType(c, datastore.NewKey(c, "Type", "", cash.Type, nil)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + err.Error() + "}"))
+		return
+	} else {
+		cash.TypeName = data.Name
+		cash.IsExpense = data.IsExpense
+	}
+
 	cash.Detail = detail
 	cash.MoneySalesIn, _ = strconv.ParseInt(moneysalesin, 10, 64)
 	cash.MoneyIn, _ = strconv.ParseInt(moneyin, 10, 64)
 	cash.MoneySalesOut, _ = strconv.ParseInt(moneysalesout, 10, 64)
 	cash.MoneyOut, _ = strconv.ParseInt(moneyout, 10, 64)
 	cash.Balance, _ = strconv.ParseInt(balance, 10, 64)
+
+	// タスクキューに転記先削除のリクエストを追加する。（追加先：Default Queue）
+	var tasks []*taskqueue.Task
+	paramExpense := url.Values {"id": {fmt.Sprintf("%d", cash.ExpenseKeyId)}}
+	tExpense := taskqueue.NewPOSTTask("/task/deleteexpense", paramExpense)
+	tasks = append(tasks, tExpense)
+
+	paramNonExpense := url.Values {"id": {fmt.Sprintf("%d", cash.NonExpenseKeyId)}}
+	tNonExpense := taskqueue.NewPOSTTask("/task/deletenonexpense", paramNonExpense)
+	tasks = append(tasks, tNonExpense)
+
+	if _, err := taskqueue.AddMulti(c, tasks, ""); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + err.Error() + "}"))
+		return 
+	}
+
+	// 転記済フラグを落とす。
+	cash.IsCopied = false
+
+	// 転記済みの場合、転記先を削除する。（Keyの参照もなくす）
+	cash.ExpenseKeyId = 0
+	cash.NonExpenseKeyId = 0
 
 	_, key, err := cash.Put(c, datastore.NewKey(c, "Cash", "", keyid, nil))
 	if err != nil {

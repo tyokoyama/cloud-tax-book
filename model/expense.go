@@ -94,6 +94,19 @@ func BatchExpensePut(c appengine.Context, expenses []Expense) ([]*datastore.Key,
 	return datastore.PutMulti(c, keys, expenses);
 }
 
+func DeleteExpense(c appengine.Context, id int64) error {
+	if c == nil {
+		return nil
+	}
+
+	key := datastore.NewKey(c, expenseKindName, "", id, nil)
+	if key.Incomplete() {
+		c.Infof("DeleteExpense: key id incomplete")
+		return nil
+	}
+	return datastore.Delete(c, key)
+}
+
 func (ex *Expense) PutNew(c appengine.Context) (*datastore.Key, *Expense, error) {
 	if c == nil {
 		return nil, nil, nil

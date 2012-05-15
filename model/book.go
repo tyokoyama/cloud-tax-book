@@ -44,7 +44,7 @@ func QueryBook(c appengine.Context) ([]*datastore.Key, []Book, error) {
 		return nil, nil, nil
 	}
 
-	q := datastore.NewQuery(bookKindName)
+	q := datastore.NewQuery(bookKindName).Order("Date")
 	if count, err := q.Count(c); err != nil {
 		return nil, nil, err
 	} else {

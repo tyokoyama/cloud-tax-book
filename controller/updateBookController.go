@@ -18,9 +18,11 @@ package controller
 import(
 	"appengine"
 	"appengine/datastore"
+	"appengine/taskqueue"
 	"fmt"
 	"model"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -48,18 +50,57 @@ func updatebook(w http.ResponseWriter, r *http.Request) {
 	c.Infof("moneyout = %s", moneyout)
 	c.Infof("balance = %s", balance)
 
-	var book model.Book
 	var keyid int64
 	keyid, _ = strconv.ParseInt(id, 10, 64)
+
+	book, getErr := model.GetBook(c, datastore.NewKey(c, "Book", "", keyid, nil))
+	if getErr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + getErr.Error() + "}"))
+		return 
+	}
+
 	book.Date, _ = time.Parse("2006-01-02", date)
-	book.IsExpense = true
 	book.Type, _ = strconv.ParseInt(moneyType, 10, 64)
+
+	if data, err := model.GetType(c, datastore.NewKey(c, "Type", "", book.Type, nil)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + err.Error() + "}"))
+		return
+	} else {
+		book.TypeName = data.Name
+		book.IsExpense = data.IsExpense
+	}
+
 	book.Detail = detail
 	book.MoneySalesIn, _ = strconv.ParseInt(moneysalesin, 10, 64)
 	book.MoneyIn, _ = strconv.ParseInt(moneyin, 10, 64)
 	book.MoneySalesOut, _ = strconv.ParseInt(moneysalesout, 10, 64)
 	book.MoneyOut, _ = strconv.ParseInt(moneyout, 10, 64)
 	book.Balance, _ = strconv.ParseInt(balance, 10, 64)
+
+	// タスクキューに転記先削除のリクエストを追加する。（追加先：Default Queue）
+	var tasks []*taskqueue.Task
+	paramExpense := url.Values {"id": {fmt.Sprintf("%d", book.ExpenseKeyId)}}
+	tExpense := taskqueue.NewPOSTTask("/task/deleteexpense", paramExpense)
+	tasks = append(tasks, tExpense)
+
+	paramNonExpense := url.Values {"id": {fmt.Sprintf("%d", book.NonExpenseKeyId)}}
+	tNonExpense := taskqueue.NewPOSTTask("/task/deletenonexpense", paramNonExpense)
+	tasks = append(tasks, tNonExpense)
+
+	if _, err := taskqueue.AddMulti(c, tasks, ""); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("{error: " + err.Error() + "}"))
+		return 
+	}
+
+	// 転記済フラグを落とす。
+	book.IsCopied = false
+
+	// 転記済みの場合、転記先を削除する。（Keyの参照もなくす）
+	book.ExpenseKeyId = 0
+	book.NonExpenseKeyId = 0
 
 	_, key, err := book.Put(c, datastore.NewKey(c, "Book", "", keyid, nil))
 	if err != nil {

@@ -44,7 +44,7 @@ func QueryCash(c appengine.Context) ([]*datastore.Key, []Cash, error) {
 		return nil, nil, nil
 	}
 
-	q := datastore.NewQuery(cashKindName)
+	q := datastore.NewQuery(cashKindName).Order("Date")
 	if count, err := q.Count(c); err != nil {
 		return nil, nil, err
 	} else {
