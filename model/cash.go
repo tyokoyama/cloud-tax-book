@@ -37,12 +37,14 @@ type Cash struct {
 	Balance int64 `datastore:",noindex"`		// 残高
 }
 
+const cashKindName = "Cash"
+
 func QueryCash(c appengine.Context) ([]*datastore.Key, []Cash, error) {
 	if c == nil {
 		return nil, nil, nil
 	}
 
-	q := datastore.NewQuery("Cash")
+	q := datastore.NewQuery(cashKindName)
 	if count, err := q.Count(c); err != nil {
 		return nil, nil, err
 	} else {
@@ -53,6 +55,28 @@ func QueryCash(c appengine.Context) ([]*datastore.Key, []Cash, error) {
 		}
 
 		return keys, cashes, nil
+	}
+
+	return nil, nil, nil
+}
+
+// 転記していないエンティティを取得する。
+func QueryCashCopyYet(c appengine.Context) ([]*datastore.Key, []Cash, error) {
+	if c == nil {
+		return nil, nil, nil
+	}
+
+	q := datastore.NewQuery(cashKindName).Filter("IsCopied = ", false)
+	if count, err := q.Count(c); err != nil {
+		return nil, nil, err
+	} else {
+		cash := make([]Cash, 0, count)
+		keys, getErr := q.GetAll(c, &cash)
+		if getErr != nil {
+			return nil, nil, getErr
+		}
+
+		return keys, cash, nil
 	}
 
 	return nil, nil, nil
@@ -73,13 +97,21 @@ func GetCash(c appengine.Context, key *datastore.Key) (*Cash, error) {
 	return &cash, nil
 }
 
+func BatchCashPut(c appengine.Context, keys []*datastore.Key, cashes []Cash) ([]*datastore.Key, error) {
+	if c == nil {
+		return nil, nil
+	}
+
+	return datastore.PutMulti(c, keys, cashes);
+}
+
 // データストアへのPUT（新規登録）
 func (cash *Cash)PutNew(c appengine.Context) (*Cash, *datastore.Key, error) {
 	if c == nil {
 		return nil, nil, nil
 	}
 
-	key := datastore.NewIncompleteKey(c, "Cash", nil)
+	key := datastore.NewIncompleteKey(c, cashKindName, nil)
 
 	return cash.Put(c, key)
 }

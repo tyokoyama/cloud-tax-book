@@ -37,14 +37,14 @@ type Book struct {
 	Balance int64 `datastore:",noindex"`		// 残高
 }
 
-const kindName = "Book"
+const bookKindName = "Book"
 
 func QueryBook(c appengine.Context) ([]*datastore.Key, []Book, error) {
 	if c == nil {
 		return nil, nil, nil
 	}
 
-	q := datastore.NewQuery(kindName)
+	q := datastore.NewQuery(bookKindName)
 	if count, err := q.Count(c); err != nil {
 		return nil, nil, err
 	} else {
@@ -66,7 +66,7 @@ func QueryBookCopyYet(c appengine.Context) ([]*datastore.Key, []Book, error) {
 		return nil, nil, nil
 	}
 
-	q := datastore.NewQuery(kindName).Filter("IsCopied = ", false)
+	q := datastore.NewQuery(bookKindName).Filter("IsCopied = ", false)
 	if count, err := q.Count(c); err != nil {
 		return nil, nil, err
 	} else {
@@ -97,13 +97,21 @@ func GetBook(c appengine.Context, key *datastore.Key) (*Book, error) {
 	return &book, nil
 }
 
+func BatchBookPut(c appengine.Context, keys []*datastore.Key, books []Book) ([]*datastore.Key, error) {
+	if c == nil {
+		return nil, nil
+	}
+
+	return datastore.PutMulti(c, keys, books);
+}
+
 // データストアへのPUT（新規登録）
 func (book *Book)PutNew(c appengine.Context) (*Book, *datastore.Key, error) {
 	if c == nil {
 		return nil, nil, nil
 	}
 
-	key := datastore.NewIncompleteKey(c, kindName, nil)
+	key := datastore.NewIncompleteKey(c, bookKindName, nil)
 
 	return book.Put(c, key)
 }
