@@ -22,10 +22,6 @@ import (
 	"net/http"
 )
 
-func init() {
-	http.HandleFunc("/cron/classification", classification)
-}
-
 // 経費帳／債権債務帳への書き込み
 func classification(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)

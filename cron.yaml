@@ -3,3 +3,8 @@ cron:
   url: /cron/classification
   schedule: every day 00:00
   timezone: Asia/Tokyo
+
+- description: datamaintenance exec
+  url: /cron/datamaintenance
+  schedule: every day 01:00
+  timezone: Asia/Tokyo
