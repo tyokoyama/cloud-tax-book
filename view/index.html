@@ -45,13 +45,17 @@ limitations under the License.
 				}
 			});
 
-			$("#cashdatepicker").datepicker({
-				dateFormat: 'yy-mm-dd'
-			});
+			// Chrome以外の場合のみDatePickerを表示する。
+			var useragent = navigator.userAgent.toLowerCase();
+			if(useragent.indexOf("chrome") == -1) {
+				$("#cashdatepicker").datepicker({
+					dateFormat: 'yy-mm-dd'
+				});
 
-			$("#bookdatepicker").datepicker({
-				dateFormat: 'yy-mm-dd'
-			});
+				$("#bookdatepicker").datepicker({
+					dateFormat: 'yy-mm-dd'
+				});
+			}
 
 			$("#cashinputbtn").click(function (e) {
 				var parameters = {date: $('#cashdatepicker').val(),
@@ -105,9 +109,13 @@ limitations under the License.
 					var inrow = $('#panel1 .list tr:last-child').clone();
 					var inputChildren = $(inrow).children('td');
 					$(inputChildren[0]).children('input').val($(obj).children('td')[0].innerText);
-					$(inputChildren[0]).children('input').datepicker({
-						dateFormat: 'yy-mm-dd'
-					});
+
+					var useragent = navigator.userAgent.toLowerCase();
+					if(useragent.indexOf("chrome") == -1) {
+						$(inputChildren[0]).children('input').datepicker({
+							dateFormat: 'yy-mm-dd'
+						});
+					}
 					$(inputChildren[1]).children('input').val($(obj).children('td')[1].innerText);
 
 					// 勘定科目は登録の物を使い回すのでコピーしない。
@@ -216,9 +224,12 @@ limitations under the License.
 					var inrow = $('#panel2 .list tr:last-child').clone();
 					var inputChildren = $(inrow).children('td');
 					$(inputChildren[0]).children('input').val($(obj).children('td')[0].innerText);
-					$(inputChildren[0]).children('input').datepicker({
-						dateFormat: 'yy-mm-dd'
-					});
+					var useragent = navigator.userAgent.toLowerCase();
+					if(useragent.indexOf("chrome") == -1) {
+						$(inputChildren[0]).children('input').datepicker({
+							dateFormat: 'yy-mm-dd'
+						});
+					}
 					$(inputChildren[1]).children('input').val($(obj).children('td')[1].innerText);
 
 					// 勘定科目は登録の物を使い回すのでコピーしない。
@@ -359,7 +370,7 @@ limitations under the License.
 					</tr>
 					{{end}}
 					<tr>
-						<td class="date"><input class="date" type="date" id="cashdatepicker" /></td>
+						<td class="date"><input class="date" type="date" id="cashdatepicker" placeholder="yyyy-MM-dd" /></td>
 						<td><input type="text" id="detail" /></td>
 						<td>
 							<select id="moneyType">
@@ -410,7 +421,7 @@ limitations under the License.
 					</tr>
 					{{end}}
 					<tr>
-						<td class="date"><input class="date" type="date" id="bookdatepicker" /></td>
+						<td class="date"><input class="date" type="date" id="bookdatepicker" placeholder="yyyy-MM-dd" /></td>
 						<td><input type="text" id="detail" /></td>
 						<td>
 							<select id="moneyType">
