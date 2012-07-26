@@ -41,6 +41,13 @@ func datamaintenance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Read SettlementSummary
+	var summary model.SettlementSummary
+	if err := summary.Get(c); err != nil {
+		c.Errorf("model.SettlementSummary.Get Error %s", err.Error())
+		return
+	}
+
 	// 現金データ
 	if cashKeys, cashes, err := model.QueryCash(c); err != nil {
 		c.Errorf("model.QueryCash Error %s", err.Error())
@@ -59,6 +66,8 @@ func datamaintenance(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+
+		summary.EndCash = balance
 	}
 
 	// 預金データ
@@ -79,6 +88,19 @@ func datamaintenance(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+
+		summary.EndBook = balance
+	}
+
+	// Put SettlementSummary
+	if err := summary.Put(c); err != nil {
+		c.Errorf("model.SettlementSummary.Put Error %s", err.Error())
+		return		
+	}
+
+	// Summary
+	if err := model.CalcSummary(c); err != nil {
+		c.Errorf("CalcSummary Error %s", err.Error())
 	}
 
 }

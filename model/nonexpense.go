@@ -75,6 +75,23 @@ func GetNonExpense(c appengine.Context, key *datastore.Key) (*NonExpense, error)
 	return &expense, nil
 }
 
+func QueryNonExpense(c appengine.Context) ([]NonExpense, error) {
+	q := datastore.NewQuery(nonexpenseKindName)
+	if count, err := q.Count(c); err != nil {
+		return nil, err
+	} else {
+		nonexpenses := make([]NonExpense, 0, count)
+		_, getErr := q.GetAll(c, &nonexpenses)
+		if getErr != nil {
+			return nil, getErr
+		}
+
+		return nonexpenses, nil
+	}
+
+	return nil, nil
+}
+
 func BatchNonExpensePut(c appengine.Context, expenses []NonExpense) ([]*datastore.Key, error) {
 	if c == nil {
 		return nil, nil

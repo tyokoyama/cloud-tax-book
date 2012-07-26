@@ -75,6 +75,23 @@ func GetExpense(c appengine.Context, key *datastore.Key) (*Expense, error) {
 	return &expense, nil
 }
 
+func QueryExpense(c appengine.Context) ([]Expense, error) {
+	q := datastore.NewQuery(expenseKindName)
+	if count, err := q.Count(c); err != nil {
+		return nil, err
+	} else {
+		expenses := make([]Expense, 0, count)
+		_, getErr := q.GetAll(c, &expenses)
+		if getErr != nil {
+			return nil, getErr
+		}
+
+		return expenses, nil
+	}
+
+	return nil, nil
+}
+
 func BatchExpensePut(c appengine.Context, expenses []Expense) ([]*datastore.Key, error) {
 	if c == nil {
 		return nil, nil

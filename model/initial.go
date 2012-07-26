@@ -21,7 +21,7 @@ import (
 )
 
 type Initial struct {
-	StartCash int64 `datasotre:",noindex"`		// 現金：前年繰越／元入金	
+	StartCash int64 `datastore:",noindex"`		// 現金：前年繰越／元入金	
 	StartBook int64 `datastore:",noindex"`		// 預金：前年繰越／元入金
 }
 
