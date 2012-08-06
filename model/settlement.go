@@ -101,13 +101,23 @@ func CalcSummary(c appengine.Context) error {
 			}
 		}
 
+		expenseKeys := make([]*datastore.Key, len(expenseMap))
+		expenseData := make([]Settlement, len(expenseMap))
+		index := 0
 		for _, settlement := range expenseMap {
 			c.Debugf("%s = %d, %d", settlement.Name, settlement.MoneyIn, settlement.MoneyOut)
 			settlementsummary.MoneyIn += settlement.MoneyIn
 			settlementsummary.MoneyOut += settlement.MoneyOut
+
+			expenseKeys[index] = datastore.NewKey(c, "Settlement", "", settlement.TypeId, nil)
+			expenseData[index] = settlement
 		}
 
 		// PUT to Datastore
+		if _, err := datastore.PutMulti(c, expenseKeys, expenseData); err != nil {
+			c.Errorf("Expense PutMulti Error: %s", err.Error())
+			return err			
+		}
 	}
 
 	// Read NonExpense
@@ -136,13 +146,23 @@ func CalcSummary(c appengine.Context) error {
 			}
 		}
 
+		expenseKeys := make([]*datastore.Key, len(nonexpenseMap))
+		expenseData := make([]Settlement, len(nonexpenseMap))
+		index := 0
 		for _, settlement := range nonexpenseMap {
 			c.Debugf("%s = %d, %d", settlement.Name, settlement.MoneyIn, settlement.MoneyOut)
 			settlementsummary.MoneyIn += settlement.MoneyIn
 			settlementsummary.MoneyOut += settlement.MoneyOut
+
+			expenseKeys[index] = datastore.NewKey(c, "Settlement", "", settlement.TypeId, nil)
+			expenseData[index] = settlement
 		}
 
 		// PUT to Datastore
+		if _, err := datastore.PutMulti(c, expenseKeys, expenseData); err != nil {
+			c.Errorf("NonExpense PutMulti Error: %s", err.Error())
+			return err			
+		}
 	}
 
 	c.Debugf("SettlementSummary = %d, %d", ( settlementsummary.MoneyOut + settlementsummary.EndCash + settlementsummary.EndBook), ( settlementsummary.MoneyIn + settlementsummary.StartCash + settlementsummary.StartBook))
