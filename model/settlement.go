@@ -111,6 +111,7 @@ func CalcSummary(c appengine.Context) error {
 
 			expenseKeys[index] = datastore.NewKey(c, "Settlement", "", settlement.TypeId, nil)
 			expenseData[index] = settlement
+			index++
 		}
 
 		// PUT to Datastore
@@ -156,6 +157,7 @@ func CalcSummary(c appengine.Context) error {
 
 			expenseKeys[index] = datastore.NewKey(c, "Settlement", "", settlement.TypeId, nil)
 			expenseData[index] = settlement
+			index++
 		}
 
 		// PUT to Datastore
