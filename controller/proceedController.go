@@ -16,19 +16,25 @@ limitations under the License.
 package controller
 
 import (
+	"appengine"
+	"html/template"
 	"net/http"
+	"model"
 )
 
-func init() {
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/addcash", addcash)
-	http.HandleFunc("/updatecash", updatecash)
-	http.HandleFunc("/addbook", addbook)
-	http.HandleFunc("/updatebook", updatebook)
-	http.HandleFunc("/updateinitial", updateinitial)
-	http.HandleFunc("/typesetting", typesetting)
-	http.HandleFunc("/addtype", addtype)
-	http.HandleFunc("/updatetype", updatetype)
-	http.HandleFunc("/deletetype", deletetype)
-	http.HandleFunc("/proceed", proceedController)
+var proceedTemplate = template.Must(template.ParseFiles("view/proceeds.html"))
+
+func proceedController(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	_, proceeds, err := model.QueryProceed(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return		
+	}
+
+	if err := proceedTemplate.Execute(w, proceeds); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
