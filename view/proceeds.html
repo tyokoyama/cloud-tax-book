@@ -1,4 +1,4 @@
-{{/*
+<!--/*
 Copyright 2012 Takashi Yokoyama
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,74 +12,50 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/}}
+*/-->
 <!DOCTYPE html>
-<html>
+<html ng-app>
 <head>
 	<meta charset="utf-8" />
 	<title>売掛金登録</title>
 	<link rel="stylesheet" href="style.css"></link>
-	<link href="jquery-ui-1.8.18.custom.css" rel="stylesheet">
-	<script src="//www.google.com/jsapi"></script>
+	<script src="/js/angular-1.0.1.min.js"></script>
 	<script>
-		google.load("jquery", "1.7");
-		google.load("jqueryui", "1.8");
-	</script>
-	<script>
-		$(function () {
-			$("input").keypress(function(event) {
-				if(!event) var event = window.event;
-				if(event.keyCode == 13) {
-					return false;
-				}
-			});
-			
-			// Chrome以外の場合のみDatePickerを表示する。
-			var useragent = navigator.userAgent.toLowerCase();
-			if(useragent.indexOf("chrome") == -1) {
-				$("#datepicker").datepicker({
-					dateFormat: 'yy-mm-dd'
-				});
+		function Controller($scope, $http, $templateCache) {
+			$scope.items = [];
+
+			$scope.addList = function() {
+				var item = {
+					 ViewDate: $scope.date
+					,Name: $scope.name
+					,Detail: $scope.itemname
+					,Proceed: $scope.proceed
+					,MoneyIn: $scope.moneyin
+					,Balance: ($scope.proceed - $scope.moneyin)
+				};
+
+				$http({method: 'POST', url: '/addproceed', data: item})
+					.success(function (data, status) {
+						$scope.items.push(item);
+					})
+					.error(function (data, status) {
+
+					});
 			}
 
-			$("#inputbtn").click(function (e) {
-				var parameters = {date: $('#datepicker').val(),
-								  detail: $('#itemname').val(),
-								  name: $('#name').val(),
-								  moneyin: $('#moneyin').val(),
-								  proceeds: $('#proceeds').val(),
-								  balance: $('#balance').text()
-								 };
-
-				$.ajax({
-					type: "POST",
-					url: '/addproceeds',
-					data: parameters,
-					dataType: "json",
-					success: function(data, status, xhr) {
-						var content = $("<tr></tr>")
-										.append("<td>" + $('#datepicker').val() + "</td>")
-										.append("<td>" + $('#name').val() + "</td>")
-										.append("<td>" + $('#itemname').val() + "</td>")
-										.append("<td>" + $('#proceeds').val() + "</td>")
-										.append("<td>" + $('#moneyin').val() + "</td>")
-										.append("<td>" + $('#balance').text() + "</td>")
-										.append("<td><input type=\"button\" id=\"editbtn\" value=\"編集\" /><input type=\"hidden\" id=\"updatekey\" value=\"" + data.id + "\" /></td>");
-
-						$('#datepicker').val('');
-						$('#name').val('');
-						$('#itemname').val('');
-						$('#proceeds').val('');
-						$('#moneyin').val('');
-
-						$('#panel1 .list tbody tr:last-child').before(content);
-					},
-					error: function(xhr, status, error) {
-						alert("サーバへの登録でエラーが発生しました。もう一度登録して下さい。\n" + "[" +  xhr.status + "]");
+			$http({method: 'GET', url: '/proceeddata', cache: $templateCache})
+				.success(function(data, status) {
+					console.log(data);
+					for(var i = 0; i < data.length; i++) {
+						$scope.items.push(data[i]);
 					}
+				})
+				.error(function(data, status) {
+					console.log("error");
+					console.log(data);
+					console.log(status);
 				});
-			});
-		});
+		}
 	</script>
 </head>
 <body>
@@ -89,7 +65,7 @@ limitations under the License.
 		</ul>
 	</nav>
 	売掛登録
-	<article id="contents">
+	<article id="contents" ng-controller="Controller">
 		<table class="list">
 			<tr>
 				<th>登録日</th>
@@ -100,30 +76,29 @@ limitations under the License.
 				<th>差引残高</th>
 				<th>登録／編集</th>
 			</tr>
-			{{range .}}
-			<tr>
-				<td>{{.Date}}</td>
-				<td>{{.Name}}</td>
-				<td>{{.Detail}}</td>
-				<td>{{.Proceed}}</td>
-				<td>{{.MoneyIn}}</td>
-				<td>{{.Balance}}</td>
+			<tr ng-repeat="item in items">
+				<td>{{item.ViewDate}}</td>
+				<td>{{item.Name}}</td>
+				<td>{{item.Detail}}</td>
+				<td>{{item.Proceed}}</td>
+				<td>{{item.MoneyIn}}</td>
+				<td>{{item.Balance}}</td>
 				<td>
 					<input type="button" id="bookeditbtn" value="編集" />
-					<input type="hidden" id="updatekey" value="{{.Id}}" />
+					<input type="hidden" id="updatekey" value="{{item.Id}}" />
 				</td>
 			</tr>
-			{{end}}
-			<tr>
-				<td><input class="date" type="date" id="datepicker" placeholder="yyyy-MM-dd" /></td>
-				<td><input type="text" name="name" id="name" /></td>
-				<td><input type="text" name="itemname" id="itemname" /></td>
-				<td><input class="number" type="number" id="proceeds" /></td>
-				<td><input class="number" type="number" id="moneyin" /></td>
-				<td><div class="number" id="balance"></div></td>
-				<td><input type="button" id="inputbtn" value="登録" /></td>
-			</tr>
 		</table>
+		<form>
+			<input class="date" type="date" id="datepicker" ng-model="date" placeholder="yyyy-MM-dd" />
+			<input type="text" name="name" id="name" ng-model="name" placeholder="取引先"/></td>
+			<input type="text" name="itemname" id="itemname" ng-model="itemname" placeholder="品名"/>
+			<input class="number" type="number" id="proceeds" ng-model="proceed" placeholder="売上金額"/>
+			<input class="number" type="number" id="moneyin" ng-model="moneyin" placeholder="受入金額"/>
+			<div>{{proceed - moneyin}}</div>
+			<input type="button" id="inputbtn" value="登録"  ng-click="addList()"/>
+		</form>
+
 	</article>
 </body>
 </html>

@@ -22,7 +22,8 @@ import (
 )
 
 type Proceed struct {
-	Date time.Time `datastore:",noindex"`     						// 登録日付
+	Date time.Time      											// 登録日付
+	ViewDate string `datastore:"-"`
 	Name string	   `datastore:",noindex"`							//
 	Detail string  `datastore:",noindex"`							// 
 	Proceed int64  `datastore:",noindex"`							//
@@ -30,7 +31,36 @@ type Proceed struct {
 	Balance int64  `datastore:",noindex"`							// 
 }
 
-const proceedKindName = `proceed`
+const (
+	proceedKindName = `proceed`
+	TimeFormat = "2006-01-02"
+)
+
+func(proceed *Proceed) Load(c <-chan datastore.Property) error {
+	if err := datastore.LoadStruct(proceed, c); err != nil {
+		return err
+	}
+
+	proceed.ViewDate = proceed.Date.Format(TimeFormat)
+	if proceed.Date.IsZero() {
+		// データがないものは現在時刻にする。
+		proceed.ViewDate = time.Now().Format(TimeFormat)
+	} else {
+		proceed.ViewDate = proceed.Date.Format(TimeFormat)
+	}
+
+	return nil
+}
+
+func(proceed *Proceed) Save(c chan<- datastore.Property) error {
+	var parseErr error
+	proceed.Date, parseErr = time.Parse(TimeFormat, proceed.ViewDate)
+	if parseErr != nil {
+		return parseErr
+	}
+
+	return datastore.SaveStruct(proceed, c)
+}
 
 func QueryProceed(c appengine.Context) ([] *datastore.Key, []Proceed, error) {
 	if c == nil {

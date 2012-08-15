@@ -30,5 +30,6 @@ func init() {
 	http.HandleFunc("/addtype", addtype)
 	http.HandleFunc("/updatetype", updatetype)
 	http.HandleFunc("/deletetype", deletetype)
-	http.HandleFunc("/proceed", proceedController)
+	http.HandleFunc("/proceeddata", proceedController)
+	http.HandleFunc("/addproceed", addProceed)
 }

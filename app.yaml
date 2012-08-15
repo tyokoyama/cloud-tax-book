@@ -25,6 +25,10 @@ handlers:
   static_files: css/images/\1
   upload: css/images/(.*\.png)
 
+- url: /proceed
+  static_files: view/proceeds.html
+  upload: view/proceeds.html
+
 - url: /.*
   script: _go_app
   login: admin

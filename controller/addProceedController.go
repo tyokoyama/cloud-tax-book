@@ -18,28 +18,29 @@ package controller
 import (
 	"appengine"
 	"encoding/json"
-	"net/http"
 	"model"
+	"net/http"
 )
 
-// var proceedTemplate = template.Must(template.ParseFiles("view/proceeds.html"))
-
-func proceedController(w http.ResponseWriter, r *http.Request) {
+func addProceed(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	c.Debugf("proceedController")
-	_, proceeds, err := model.QueryProceed(c)
-	if err != nil {
+
+	var body = make([]byte, r.ContentLength)
+	r.Body.Read(body)
+
+	c.Debugf("%s", string(body))
+
+	var proceed model.Proceed
+	if err := json.Unmarshal(body, &proceed); err != nil {
+		c.Errorf("JSON Unmarshal Error %s", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return		
+		return
 	}
 
-	if response, jsonerr := json.Marshal(&proceeds); jsonerr != nil {
-		c.Errorf("JSON Error %s", jsonerr.Error())
-		http.Error(w, "Error", http.StatusInternalServerError)
-	} else {
-		w.Header().Add("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		w.Write(response)
+	if _, _, err := proceed.PutNew(c); err != nil {
+		c.Errorf("Proceed Put Error %s", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return		
 	}
 
 }
